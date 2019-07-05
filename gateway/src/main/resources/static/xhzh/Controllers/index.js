@@ -36,6 +36,14 @@ xh.load = function() {
         //判断是否登录end
 	});
 };
+
+xh.playSound = function() {
+    var audio = document.getElementById("alarm");
+    // 重新播放
+    audio.currentTime = 0;
+    audio.play();
+};
+
 /* 获取cookie */
 xh.getcookie = function(name) {
 	var strcookie = document.cookie;

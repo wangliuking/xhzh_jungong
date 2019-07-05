@@ -2,20 +2,20 @@
  * 用户管理
  */
 if (!("xh" in window)) {
-	window.xh = {};
+    window.xh = {};
 };
 require.config({
-	paths : {
-		echarts : 'lib/echarts'
-	}
+    paths : {
+        echarts : 'lib/echarts'
+    }
 });
 var alarmbs=true;
 var alarmji=true;
 var appElement = document.querySelector('[ng-controller=screen]');
 var structure;
 xh.load = function() {
-	var app = angular.module("app", []);
-	app.controller("screen", function($scope, $http) {
+    var app = angular.module("app", []);
+    app.controller("screen", function($scope, $http) {
         //判断是否登录start
         $.ajax({
             type: 'GET',
@@ -35,7 +35,7 @@ xh.load = function() {
         xh.initTotal();
         //setInterval(xh.initTotal, 30000);
 
-	});
+    });
 };
 
 xh.initTotal = function(){
@@ -46,6 +46,7 @@ xh.initTotal = function(){
         dataType : "json",
         async : false,
         success : function(response) {
+            var rtuList = response.rtuList;
             var siteNum = response.siteNum;
             var rtuNum = response.rtuNum;
             var deviceTotalNum = response.deviceTotalNum;
@@ -55,271 +56,422 @@ xh.initTotal = function(){
             var siteOff = response.siteOff;
             var data = response.num;
 
-            $("#siteNum").html(xh.formatNum(siteNum));
-            $("#rtuNum").html(xh.formatNum(rtuNum));
-            $("#deviceNum").html(xh.formatNum(deviceTotalNum));
-            $("#rtuOffNum").html(xh.formatNum(rtuWarningNum));
+            $("#siteNum").html(siteNum);
+            $("#rtuNum").html(rtuNum);
+            $("#deviceNum").html(deviceTotalNum);
+            $("#rtuOffNum").html(rtuWarningNum);
 
-            xh.map(siteOff);
             xh.deviceWarningTop5(siteWarningTop5);
             xh.deviceOffTop5(siteDeviceOffTop5);
             xh.call(data);
             xh.waterstatus(1,0);
             xh.waterstatus(2,0);
             xh.waterstatus(3,0);
+
+            $.ajax({
+                url : '../../connect/selectAllSite?start=&limit=&structure='+structure,
+                type : 'GET',
+                dataType : "json",
+                async : false,
+                success : function(response) {
+                    xh.map(response.items);
+                }
+            });
         }
     });
 }
 
+var provinceJson = {"北京市":11,"天津市":12,"河北省":13,"山西省":14,"内蒙古自治区":15,"辽宁省":21,"吉林省":22,"黑龙江省":23,"上海市":31,"江苏省":32,"浙江省":33,"安徽省":34,"福建省":35,"江西省":36,"山东省":37,"河南省":41,"湖北省":42,"湖南省":43,"广东省":44,"广西壮族自治区":45,"海南省":46,"重庆市":50,"四川省":51,"贵州省":52,"云南省":53,"西藏自治区":54,"陕西省":61,"甘肃省":62,"青海省":63,"宁夏回族自治区":64,"新疆维吾尔自治区":65,"台湾省":71,"香港特别行政区":81,"澳门特别行政区":82};
+var cityPosition = {"北京市":["116.405289","39.904987"],"天津市":["117.190186","39.125595"],"河北省":["114.502464","38.045475"],"山西省":["112.549248","37.857014"],"内蒙古自治区":["111.751990","40.841490"],"辽宁省":["123.429092","41.796768"],"吉林省":["125.324501","43.886841"],"黑龙江省":["126.642464","45.756966"],"上海市":["121.472641","31.231707"],"江苏省":["118.76741","32.041546"],"浙江省":["120.15358","30.287458"],"安徽省":["117.283043","31.861191"],"福建省":["119.306236","26.075302"],"江西省":["115.892151","28.676493"],"山东省":["117.000923","36.675808"],"河南省":["113.665413","34.757977"],"湖北省":["114.298569","30.584354"],"湖南省":["112.982277","28.19409"],"广东省":["113.28064","23.125177"],"广西壮族自治区":["108.320007","22.82402"],"海南省":["110.199890","20.044220"],"重庆市":["106.504959","29.533155"],"四川省":["104.065735","30.659462"],"贵州省":["106.713478","26.578342"],"云南省":["102.71225","25.040609"],"西藏自治区":["91.11450","29.644150"],"陕西省":["108.948021","34.263161"],"甘肃省":["103.834170","36.061380"],"青海省":["101.777820","36.617290"],"宁夏回族自治区":["106.232480","38.486440"],"新疆维吾尔自治区":["87.616880","43.826630"],"台湾省":["121.50","25.03"],"香港特别行政区":["114.165460","22.275340"],"澳门特别行政区":["113.549130","22.198750"]};
 xh.map=function(data){
-	// 设置容器宽高
-	var height=document.documentElement.clientHeight;
-	var width=document.documentElement.clientWidth;
-	var resizeBarContainer = function() {
-		$("#map").width((width/12)*5);
-		$("#map").height(height-115);
-	};
-	resizeBarContainer();
+    console.log(data);
+    // 设置容器宽高
+    var height=document.documentElement.clientHeight;
+    var width=document.documentElement.clientWidth;
+    var resizeBarContainer = function() {
+        $("#map").width((width/12)*7);
+        $("#map").height(height-200);
+    };
+    resizeBarContainer();
 
-	// 基于准备好的dom，初始化echarts实例
-	var chart = null;
-	if (chart != null) {
-		chart.clear();
-		chart.dispose();
-	}
-	
-	require([ 'echarts', 'echarts/chart/map' ], function(ec) {
-		chart = ec.init(document.getElementById('map'));
-		require('echarts/util/mapData/params').params.CD = {
-		    getGeoJson: function (callback) {
-		        $.getJSON('lib/echarts/util/mapData/params/65.json',callback);
-		    }
-		}
-		var option = {
-			    backgroundColor: '',
-			    color: ['gold','aqua','lime'],
-			  
-			 
-			    textStyle:{
-                	color:'#fff'
+    // 基于准备好的dom，初始化echarts实例
+    var chart = null;
+    if (chart != null) {
+        chart.clear();
+        chart.dispose();
+    }
+
+    require([ 'echarts', 'echarts/chart/map' ], function(ec) {
+        chart = ec.init(document.getElementById('map'));
+        require('echarts/util/mapData/params').params.CN = {
+            getGeoJson: function (callback) {
+                $.getJSON('lib/echarts/util/mapData/params/china.json',callback);
+            }
+        }
+        var option = {
+            backgroundColor: '',
+            color: ['gold','aqua','lime'],
+            textStyle:{
+                color:'#fff'
+            },
+            tooltip : {
+                trigger: 'item',
+                formatter: function (params, ticket, callback) {
+                    console.log(params)
+                    if(params.value != ""){
+                        return params.name+'<br />'+"站点数量:"+params.value;
+                    }else{
+                        return params.name;
+                    }
                 },
-			    tooltip : {
-			        trigger: 'item',
-			        formatter: '{b}'
-			    },
-			    series : [
-			        {
-			            name: '全国',
-			            type: 'map',
-			            roam: true,
-			            hoverable: false,
-			            mapType: 'CD',
-			            itemStyle:{
-			                normal:{
-			                	label:{
-			                		show:true,
-			                		textStyle:{
-			    			            color:'#fff',
-			    			            fontSize:11
-			    			        }
-			                		} ,
-			                    borderColor:'green',
-			                    borderWidth:1,
-			                    areaStyle:{
-			                        /*color: '#1b1b1b',*/
-			                        color:'',
-			                        visibility: 'off'
-			                    },
-			                    
-			                    emphasis:{label:{show:true}} 
-			                }
-			            },
-			            geoCoord: {
-			                
-			            },
-			            data:[],
-			            markPoint:{
-			            	symbol:'emptyCircle',
-			               /* symbolSize : function (v){
-			                    return 10 + v/10
-			                },*/
-			                effect : {
-			                    show: true,
-			                    shadowBlur : 20,
-			                    
-			                    color:'red'
-			                },
-			                itemStyle:{
-			                    normal:{
-			                        label:{show:true}
-			                    },
-			                    emphasis: {
-			                        label:{position:'bottom'}
-			                    }
-			                },
-			                data : []
-			            }
-			            
-			        }
-			    ]
-			};
-		 for (var i in data) {
-             option.series[0].geoCoord[data[i].site_name] = [parseFloat(data[i].site_lng), parseFloat(data[i].site_lat)];
-             option.series[0].markPoint.data.push({"name":data[i].site_name});
-		 }
-        //option.series[0].geoCoord["1-乌鲁木齐"] = [87.68333, 43.76667];
-		chart.setOption(option);
-	});
-	
+                textStyle:{
+                    color:"#fff",
+                    fontSize:18,
+                    fontWeight:"bold"
+                }
+            },
+            series : [
+                {
+                    name: '全国',
+                    type: 'map',
+                    roam: false,
+                    hoverable: true,
+                    mapType: 'CN',
+                    itemStyle:{
+                        normal:{
+                            borderColor:"#fff",
+                            label:{
+                                show:true,
+                                textStyle:{
+                                    color:'#fff',
+                                    fontSize:11
+                                }
+                            } ,
+                            borderWidth:1,
+                            areaStyle:{
+                                /*color: '#1b1b1b',*/
+                                color:'#072631',
+                                visibility: 'off'
+                            },
+
+                            emphasis:{label:{show:true}}
+                        }
+                    },
+                    geoCoord: {
+
+                    },
+                    data:[],
+                    markPoint:{
+                        clickable: false,
+                        symbol:'pin',//'image://images/标注_l.png',
+                        symbolSize : function (v){
+                            return 3
+                        },
+                        effect : {
+                            show: false,
+                            type: "bounce"
+                        },
+                        itemStyle:{
+                            normal:{
+                                color:"#25deff",
+                                areaStyle:{
+                                    color:"#fff",
+                                    type:"default"
+                                },
+                                label:{
+                                    show:true,
+                                    textStyle:{
+                                        color:"#fff",
+                                        baseline:"bottom",
+                                        fontSize:16,
+                                        fontWeight:"bold"
+                                    }
+                                }
+                            },
+                            emphasis: {
+                                color:"#25deff",
+                                areaStyle:{
+                                    color:"#fff",
+                                    type:"default"
+                                },
+                                label:{
+                                    show:true,
+                                    textStyle:{
+                                        color:"#fff",
+                                        baseline:"bottom",
+                                        fontSize:16,
+                                        fontWeight:"bold"
+                                    }
+                                }
+                            }
+                        },
+                        data : []
+                    }
+
+                }
+            ]
+        };
+        var provinceInit = [];
+        var cityInit = [];
+        for(var i in data){
+            option.series[0].geoCoord[data[i].site_name] = [data[i].site_lng, data[i].site_lat];
+            option.series[0].markPoint.data.push({name:data[i].site_name});
+            provinceInit.push(data[i].site_province);
+            cityInit.push(data[i].site_city);
+        }
+
+        var provinceTotal = totalMapEl(provinceInit);
+        var cityTotal = totalMapEl(cityInit);
+
+        for(var key in provinceTotal){
+            option.series[0].data.push({name:key,value:provinceTotal[key]});
+        }
+
+        for(var key in cityTotal){
+            option.series[0].data.push({name:key,value:cityTotal[key]});
+        }
+
+        chart.setOption(option);
+
+        //点击事件,根据点击某个省份计算出这个省份的数据
+        chart.on('dblclick', function (params) {
+            option.series[0].data = [];
+            for(var key in provinceTotal){
+                option.series[0].data.push({name:key,value:provinceTotal[key]});
+            }
+            for(var key in cityTotal){
+                option.series[0].data.push({name:key,value:cityTotal[key]});
+            }
+            var area = provinceJson[params.data.name];
+            var chooseArea;
+            if(!area){
+                chooseArea = "china";
+            }else{
+                chooseArea = area;
+            }
+            for(var i in data){
+                option.series[0].geoCoord[data[i].site_name] = [data[i].site_lng, data[i].site_lat];
+                option.series[0].markPoint.data.push({name:data[i].site_name});
+            }
+            //逻辑控制
+            chart.clear();
+            require('echarts/util/mapData/params').params.CN = {
+                getGeoJson: function (callback) {
+                    $.getJSON('lib/echarts/util/mapData/params/'+chooseArea+'.json',callback);
+                }
+            }
+            chart.setOption(option);
+        });
+
+    });
+
 }
+
+/**
+ * 统计地图上的省份和城市站点数量
+ * @param param
+ * @returns {*}
+ */
+function totalMapEl(param){
+    var temp = param.reduce(function (allNames, name) {
+        if (name in allNames) {
+            allNames[name]++;
+        }
+        else {
+            allNames[name] = 1;
+        }
+        return allNames;
+    }, {});
+    return temp;
+}
+
 xh.deviceWarningTop5=function(data){
-	// 设置容器宽高
-	var height=document.documentElement.clientHeight;
-	var width=document.documentElement.clientWidth;
-	var resizeBarContainer = function() {
-		$("#deviceWarning-top5").width((width/12)*3);
-		$("#deviceWarning-top5").height((height-200)/2);
-	};
-	resizeBarContainer();
 
-	// 基于准备好的dom，初始化echarts实例
-	var chart = null;
-	if (chart != null) {
-		chart.clear();
-		chart.dispose();
-	}
-	
-	
-	
-	require([ 'echarts', 'echarts/chart/funnel' ], function(ec) {
-		chart = ec.init(document.getElementById('deviceWarning-top5'));
-		var leglend=[]
-		/*for(var i=0;i<data.length;i++){
-			leglend.push(data[i].name+"-"+data[i].value);
-			data[i].name=data[i].name+"    ["+data[i].value+"]"
-		}*/
-		
-		var option = {
-			    
-			    tooltip : {
-			        trigger: 'item',
-			        formatter: "{a} <br/>{b} : {c}"
-			    },
-			    calculable : false,
-			    series : [
-			              {
-					            name:'设备异常',
-					            type:'funnel',
-					            width: 60,
-					            height:'80%',
-					            maxSize: '30%',
-					            sort: 'descending', //数据排序，如果是：ascending，则是金字塔状 
-					            gap: 1, //数据图像间距 
-					            itemStyle: {//图像样式 
-					                normal: { 
-					                    borderColor: '#fff', //描边颜色 
-					                    borderWidth: 1  //描边宽度 
-					                    
-					                } 
-					            },
-					            x:'10%',
-					            y:10,
-					            data:data
-					        }
-			    ]
-			};
-		chart.setOption(option);
+    // 设置容器宽高
+    var height=document.documentElement.clientHeight;
+    var width=document.documentElement.clientWidth;
+    var resizeBarContainer = function() {
+        $("#deviceWarning-top5").width((width/12)*2);
+        $("#deviceWarning-top5").height((height-240)/2);
+    };
+    resizeBarContainer();
 
-	});
-	/*window.onresize = function() {
-		// 重置容器高宽
-		chart.resize();
-	};*/
-	
+    // 基于准备好的dom，初始化echarts实例
+    var chart = null;
+    if (chart != null) {
+        chart.clear();
+        chart.dispose();
+    }
+
+    require([ 'echarts', 'echarts/chart/pie' ], function(ec) {
+        chart = ec.init(document.getElementById('deviceWarning-top5'));
+        var leglend=[]
+        if(data.length > 0){
+            for(var i=0;i<data.length;i++){
+                leglend.push(data[i].name);
+            }
+        }
+
+        var option = {
+            tooltip : {
+                trigger: 'item',
+                padding: 10,
+                backgroundColor: 'rgba(9, 131, 195, 0.83)',
+                position: function(a){
+                    console.log(a);
+                    return [a[0]*0.5,a[1]*0.5];
+                },
+                /*formatter: function (a) {
+                    console.log(a);
+                    var tempUnit = a.seriesIndex == 0?"mV":"A/m²";
+                    return a.data[0] + '</br>' + a.seriesName + ':' + a.data[1] + tempUnit;
+                }*/
+                formatter: "{a} <br/>{b} : {c} ({d}%)",
+                textStyle: {
+                    color: "#fff",
+                    fontSize: 14,
+                    fontWeight: "bold"
+                }
+            },
+            legend: {
+                x: 'center',
+                y: height*0.05,
+                itemWidth: 20,
+                itemHeight: 20,
+                textStyle: {
+                    color: "#fff",
+                    fontSize: 14,
+                    fontWeight: "bold"
+                },
+                data:leglend
+            },
+            calculable : true,
+            series : [
+                {
+                    name:'异常数量',
+                    type:'pie',
+                    radius : '55%',
+                    center: ['50%', '60%'],
+                    data:data,
+                    itemStyle: {
+                        normal: {
+                            label: {
+                                textStyle: {
+                                    color: "#fff",
+                                    fontSize: 14,
+                                    fontWeight: "bold"
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        };
+        if(data.length > 0){
+            chart.setOption(option);
+        }
+
+    });
+    /*window.onresize = function() {
+        // 重置容器高宽
+        chart.resize();
+    };*/
+
 }
 xh.deviceOffTop5=function(data){
-	// 设置容器宽高
-	var height=document.documentElement.clientHeight;
-	var width=document.documentElement.clientWidth;
-	var resizeBarContainer = function() {
-		$("#deviceOff-top5").width((width/12)*3);
-		$("#deviceOff-top5").height((height-200)/2);
-	};
-	resizeBarContainer();
+    //data = [{name:"管线1",value:100},{name:"管线2",value:150},{name:"管线3",value:180}]
+    // 设置容器宽高
+    var height=document.documentElement.clientHeight;
+    var width=document.documentElement.clientWidth;
+    var resizeBarContainer = function() {
+        $("#deviceOff-top5").width((width/12)*2);
+        $("#deviceOff-top5").height((height-200)/2);
+    };
+    resizeBarContainer();
 
-	// 基于准备好的dom，初始化echarts实例
-	var chart = null;
-	if (chart != null) {
-		chart.clear();
-		chart.dispose();
-	}
-	
-	
-	
-	require([ 'echarts', 'echarts/chart/funnel' ], function(ec) {
-		chart = ec.init(document.getElementById('deviceOff-top5'));
-		var leglend=[]
-		/*for(var i=0;i<data.length;i++){
-			leglend.push(data[i].name);
-			data[i].name=data[i].name+"    ["+data[i].value+"]"
-		}*/
-		var option = {
-			    
-			    tooltip : {
-			        trigger: 'item',
-			        formatter: "{a} <br/>{b} : {c}"
-			    },
-			   
-			   /* legend: {
-			    	 orient : 'vertical',
-				        x : 'left',
-				        textStyle:{
-				        	color:'#fff',
-				        },
-			        data :leglend
-			    },*/
-			    calculable : false,
-			    series : [
-			        {
-			            name:'设备离线',
-			            type:'funnel',
-			            width: 60,
-			            height:'80%',
-			            maxSize: '30%',
-			            sort: 'descending', //数据排序，如果是：ascending，则是金字塔状 
-			            gap: 1, //数据图像间距 
-			            itemStyle: {//图像样式 
-			                normal: { 
-			                    borderColor: '#fff', //描边颜色 
-			                    borderWidth: 1  //描边宽度 
-			                } 
-			            },
-			  
-			            
-			            x:'10%',
-			            y:10,
-			            data:data
-			        }
-			    ]
-			};
-		chart.setOption(option);
-		
-		
+    // 基于准备好的dom，初始化echarts实例
+    var chart = null;
+    if (chart != null) {
+        chart.clear();
+        chart.dispose();
+    }
 
-	});
-	/*window.onresize = function() {
-		// 重置容器高宽
-		chart.resize();
-	};*/
-	
+    require([ 'echarts', 'echarts/chart/pie' ], function(ec) {
+        chart = ec.init(document.getElementById('deviceOff-top5'));
+        var leglend=[]
+        if(data.length > 0){
+            for(var i=0;i<data.length;i++){
+                leglend.push(data[i].name);
+            }
+        }
+        var option = {
+            tooltip : {
+                trigger: 'item',
+                padding: 10,
+                backgroundColor: 'rgba(9, 131, 195, 0.83)',
+                position: function(a){
+                    console.log(a);
+                    return [a[0]*0.5,a[1]*0.5];
+                },
+                formatter: "{a} <br/>{b} : {c} ({d}%)",
+                textStyle: {
+                    color: "#fff",
+                    fontSize: 14,
+                    fontWeight: "bold"
+                }
+            },
+            legend: {
+                x: 'center',
+                y: height*0.05,
+                itemWidth: 20,
+                itemHeight: 20,
+                textStyle: {
+                    color: "#fff",
+                    fontSize: 14,
+                    fontWeight: "bold"
+                },
+                data:leglend
+            },
+            calculable : true,
+            series : [
+                {
+                    name:'离线数量',
+                    type:'pie',
+                    radius : '55%',
+                    center: ['50%', '60%'],
+                    data:data,
+                    itemStyle: {
+                        normal: {
+                            label: {
+                                textStyle: {
+                                    color: "#fff",
+                                    fontSize: 14,
+                                    fontWeight: "bold"
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        };
+        if(data.length > 0){
+            chart.setOption(option);
+        }
+
+    });
+    /*window.onresize = function() {
+        // 重置容器高宽
+        chart.resize();
+    };*/
+
 }
 xh.call = function(data) {
     // 设置容器宽高
     var height=document.documentElement.clientHeight;
     var width=document.documentElement.clientWidth;
     var resizeBarContainer = function() {
-        $("#call-bar").width((width/12)*4);
-        $("#call-bar").height(height-410);
+        $("#call-bar").width((width/12)*2.6);
+        $("#call-bar").height(height-320);
     };
     resizeBarContainer();
 
@@ -335,12 +487,12 @@ xh.call = function(data) {
             tooltip : {
                 trigger: 'axis'
             },
-            legend: {
+            /*legend: {
                 data:['上报数据'],
                 textStyle:{
                     color:'#fff'
                 }
-            },
+            },*/
 
             calculable : true,
             xAxis : [
@@ -383,7 +535,7 @@ xh.call = function(data) {
         };
 
         //start
-		//var response = {"num":[{"num":1246,"label":"00"},{"num":1003,"label":"01"},{"num":453,"label":"02"},{"num":277,"label":"03"},{"num":287,"label":"04"},{"num":352,"label":"05"},{"num":542,"label":"06"},{"num":5538,"label":"07"},{"num":11388,"label":"08"},{"num":8998,"label":"09"},{"num":8441,"label":"10"},{"num":480,"label":"11"},{"num":0,"label":"12"},{"num":0,"label":"13"},{"num":0,"label":"14"},{"num":0,"label":"15"},{"num":0,"label":"16"},{"num":0,"label":"17"},{"num":0,"label":"18"},{"num":0,"label":"19"},{"num":0,"label":"20"},{"num":0,"label":"21"},{"num":0,"label":"22"},{"num":0,"label":"23"}]};
+        //var response = {"num":[{"num":1246,"label":"00"},{"num":1003,"label":"01"},{"num":453,"label":"02"},{"num":277,"label":"03"},{"num":287,"label":"04"},{"num":352,"label":"05"},{"num":542,"label":"06"},{"num":5538,"label":"07"},{"num":11388,"label":"08"},{"num":8998,"label":"09"},{"num":8441,"label":"10"},{"num":480,"label":"11"},{"num":0,"label":"12"},{"num":0,"label":"13"},{"num":0,"label":"14"},{"num":0,"label":"15"},{"num":0,"label":"16"},{"num":0,"label":"17"},{"num":0,"label":"18"},{"num":0,"label":"19"},{"num":0,"label":"20"},{"num":0,"label":"21"},{"num":0,"label":"22"},{"num":0,"label":"23"}]};
         var num = data;
         var xData=[],yData=[];
 
@@ -394,7 +546,7 @@ xh.call = function(data) {
         option.series[0].data = yData;
         option.xAxis[0].data = xData;
         chart.setOption(option);
-		//end
+        //end
         /*$.ajax({
             url : 'call/chart',
             type : 'POST',
@@ -441,46 +593,50 @@ xh.call = function(data) {
     };
 };
 xh.waterstatus=function(id,totals){
-	var vaterColor="blue";
-	if(id==1){
-		vaterColor="#808000";
-	}else if(id==2){
-		vaterColor="#00FF00";
-	}else if(id==3){
-		vaterColor="red";
-	}
-	$('#access'+id).waterbubble({
-		radius : 40,
-		lineWidth : 2,
-		data : 0.7,
-		waterColor : vaterColor,
-		textColor : '#fff',
-		txt : totals.toString(),
-		font : 'bold 20px "Microsoft YaHei"',
-		wave : true,
-		animation : true
-	});
+    var vaterColor="blue";
+    var tColor;
+    if(id==1){
+        vaterColor="#28beff";
+        tColor="#fff";
+    }else if(id==2){
+        vaterColor="#28beff";
+        tColor="#fff";
+    }else if(id==3){
+        vaterColor="#28beff";
+        tColor="yellow";
+    }
+    $('#access'+id).waterbubble({
+        radius : 40,
+        lineWidth : 2,
+        data : 0.7,
+        waterColor : vaterColor,
+        textColor : tColor,
+        txt : totals.toString(),
+        font : 'bold 20px "Microsoft YaHei"',
+        wave : true,
+        animation : true
+    });
 }
 xh.getOneDay=function() {
-    var   today=new Date();      
+    var   today=new Date();
     var   yesterday_milliseconds=today.getTime();    //-1000*60*60*24
 
-    var   yesterday=new   Date();      
-    yesterday.setTime(yesterday_milliseconds);      
-        
-    var strYear=yesterday.getFullYear(); 
+    var   yesterday=new   Date();
+    yesterday.setTime(yesterday_milliseconds);
 
-    var strDay=yesterday.getDate();   
-    var strMonth=yesterday.getMonth()+1; 
+    var strYear=yesterday.getFullYear();
 
-    if(strMonth<10)   
-    {   
-        strMonth="0"+strMonth;   
-    } 
-    if(strDay<10){
-    	strDay="0"+strDay;
+    var strDay=yesterday.getDate();
+    var strMonth=yesterday.getMonth()+1;
+
+    if(strMonth<10)
+    {
+        strMonth="0"+strMonth;
     }
-    var strYesterday=strYear+"-"+strMonth+"-"+strDay;   
+    if(strDay<10){
+        strDay="0"+strDay;
+    }
+    var strYesterday=strYear+"-"+strMonth+"-"+strDay;
     return  strYesterday;
 }
 

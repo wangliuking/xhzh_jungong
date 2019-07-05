@@ -11,6 +11,7 @@
 
 
     <!--common-->
+    <link rel="stylesheet" type="text/css" href="xcConfirm/css/xcConfirm.css"/>
     <link href="Resources/AdminEx/css/style.css" rel="stylesheet">
     <link href="Resources/AdminEx/css/style-responsive.css" rel="stylesheet">
     <style type="text/css">
@@ -95,10 +96,10 @@
         }
 
         .header {
-            background: -webkit-linear-gradient(left, red , blue); /* Safari 5.1 - 6.0 */
+            background: -webkit-linear-gradient(left, red, blue); /* Safari 5.1 - 6.0 */
             background: -o-linear-gradient(right, red, blue); /* Opera 11.1 - 12.0 */
             background: -moz-linear-gradient(right, red, blue); /* Firefox 3.6 - 15 */
-            background: linear-gradient(to right,#333,#838B83); /* 标准的语法 */
+            background: linear-gradient(to right, #333, #838B83); /* 标准的语法 */
         }
 
     </style>
@@ -114,11 +115,12 @@
 <body class="sticky-header" ng-app="app" ng-controller="index">
 
 <section>
-    <div class="header" style="position: fixed;top:0;left:0;width: 100%;height: 50px;background-image:-webkit-linear-gradient(0deg,#001731,#004894);z-index: 9999;">
+    <div class="header"
+         style="position: fixed;top:0;left:0;width: 100%;height: 50px;background-image:-webkit-linear-gradient(0deg,#001731,#004894);z-index: 9999;">
         <div>
-            <a href="bmap/map.html" target="mainframe"><img src="images/新疆雷电中心透明.png"
-                            width="58px" height="50px" alt="" style="margin:0px 10px 10px 10px;"></a> <span
-                style="color:#fff;font-size:24px;line-height: 50px;">防雷防静电智能在线监测与管理服务平台</span>
+            <a href="bmap/map.html" target="mainframe"><img src="images/XH_w.png"
+                                                            width="38px" height="30px" alt="" style="margin:0px 10px 10px 15px;"></a> <span
+                style="color:#fff;font-size:24px;line-height: 50px;">电磁防护智能在线监测与管理系统</span>
         </div>
     </div>
     <!-- left side start-->
@@ -166,13 +168,16 @@
                 <li ng-show="power.menu_protect == 1" class="menu-list nav-active"><a href=""><i
                         class="fa fa-flash"></i> <span>智能防护</span></a>
                     <ul class="sub-menu-list">
-                        <li ng-show="power.menu_protect_conf == 1"><a href="Views/menu/menu_device.html" target="mainframe">现场配置</a></li>
+                        <li ng-show="power.menu_protect_conf == 1"><a href="Views/menu/menu_device.html"
+                                                                      target="mainframe">现场配置</a></li>
                         <li ng-show="power.menu_protect_search == 1"><a href="Views/menu/menu_search.html"
-                               target="mainframe"> 数据查询</a></li>
+                                                                        target="mainframe"> 数据查询</a></li>
                         <li ng-show="power.menu_protect_count == 1"><a href="dataStatistics.html"
-                               target="mainframe">数据统计</a></li>
-                        <li ng-show="power.menu_protect_alarm == 1"><a href="Views/menu/menu_alarm.html" target="mainframe">系统报警</a></li>
-                        <li ng-show="power.menu_protect_maintain == 1"><a href="deviceMaintainList.html" target="mainframe">设备维护记录</a></li>
+                                                                       target="mainframe">数据统计</a></li>
+                        <li ng-show="power.menu_protect_alarm == 1"><a href="Views/menu/menu_alarm.html"
+                                                                       target="mainframe">系统报警</a></li>
+                        <li ng-show="power.menu_protect_maintain == 1"><a href="deviceMaintainList.html"
+                                                                          target="mainframe">设备维护记录</a></li>
                     </ul>
                 </li>
 
@@ -218,7 +223,7 @@
                         <li ng-show="power.menu_manage_user == 1"><a href="userList.html" target="mainframe">
                             用户管理</a></li>
                         <li ng-show="power.menu_manage_group == 1"><a href="groupList.html"
-                               target="mainframe"> 用户组管理</a></li>
+                                                                      target="mainframe"> 用户组管理</a></li>
                         <li ng-show="power.menu_manage_role == 1"><a href="roleList.html" target="mainframe">
                             角色管理</a></li>
                         <li ng-show="power.menu_manage_log == 1"><a href="systemLog.html" target="mainframe">
@@ -256,6 +261,12 @@
             </div>
             <!--search end-->
 
+            <!--<a href="javascript:void(0);" onclick="xh.playSound()">测试语音</a>-->
+            <audio id="alarm">
+                <source src="sound/alarm.mp3" type="audio/mp3">
+                <source src="sound/alarm.ogg" type="audio/ogg">
+            </audio>
+
             <!--notification menu start -->
             <div class="menu-right">
                 <ul class="notification-menu">
@@ -287,7 +298,8 @@
                                    target="mainframe"><i class="fa fa-user"></i> 邮件</a></li>-->
                             <li><a href="userList.html"
                                    target="mainframe"><i class="fa fa-cog"></i> 修改个人资料</a></li>
-                            <li><a href="javascript:void(0);" onclick="loginOut()"><i class="fa fa-sign-out"></i>退出</a></li>
+                            <li><a href="javascript:void(0);" onclick="loginOut()"><i class="fa fa-sign-out"></i>退出</a>
+                            </li>
                         </ul>
                     </li>
 
@@ -312,7 +324,7 @@
             <div class="container-fluid" style="font-size: 15px">
                 <div class="row">
                     <div class="col-md-12">
-                        新疆维吾尔自治区雷电防护技术开发中心监制 版本v2.0 powered by 中航信虹
+                        版本v2.0 powered by 中航信虹
                     </div>
                     <!--<div class="col-md-3">
                         <div class="text-md-right footer-links d-none d-sm-block">
@@ -331,6 +343,7 @@
 
 <!-- Placed js at the end of the document so the pages load faster -->
 <script src="Resources/AdminEx/js/jquery-3.2.1.min.js"></script>
+<script src="xcConfirm/js/xcConfirm.js" type="text/javascript" charset="utf-8"></script>
 <!--<script src="Resources/AdminEx/js/jquery-ui-1.9.2.custom.min.js"></script>-->
 <!--<script src="Resources/AdminEx/js/jquery-migrate-1.2.1.min.js"></script>-->
 <script src="Resources/AdminEx/js/bootstrap.min.js"></script>
@@ -345,30 +358,69 @@
 <script type="text/javascript" src="Controllers/index.js"></script>
 <script type="text/javascript">
     xh.load();
+
     function loginOut() {
         $.ajax({
-            url : "../../loginOut",
-            type : 'GET',
-            dataType : "json",
-            async : false,
-            success : function(data) {
+            url: "../../loginOut",
+            type: 'GET',
+            dataType: "json",
+            async: false,
+            success: function (data) {
                 console.log(data);
-                if(data.result == "退出成功"){
+                if (data.result == "退出成功") {
                     alert("退出成功！");
                     window.location.href = "login.html";
                 }
             },
-            error : function() {
+            error: function () {
 
             }
         });
     }
+
     function controllFoot() {
         var dis = $(".footer").css("display");
-        if(dis == "block"){
-            $(".footer").css("display","none");
-        }else{
-            $(".footer").css("display","block");
+        if (dis == "block") {
+            $(".footer").css("display", "none");
+        } else {
+            $(".footer").css("display", "block");
+        }
+    }
+
+    var socket;
+    if (typeof(WebSocket) == "undefined") {
+        console.log("您的浏览器不支持WebSocket");
+    } else {
+        console.log("您的浏览器支持WebSocket");
+        var domain = window.location.host;
+        console.log("当前域名 ： "+domain.split(":",1));
+        var cid = 1;
+        //实现化WebSocket对象，指定要连接的服务器地址与端口  建立连接
+        // 等同于socket = new WebSocket("ws://localhost:8083/checkcentersys/websocket/20");
+        socket = new WebSocket("ws://"+domain.split(":",1)+":8082/websocket/"+cid);
+        //打开事件
+        socket.onopen = function () {
+            console.log("Socket 已打开");
+            //socket.send("这是来自客户端的消息" + location.href + new Date());  };
+            // 获得消息事件
+            socket.onmessage = function (msg) {
+                console.log(msg.data);
+                if(msg.data != "success"){
+                    xh.playSound();
+                    //发现消息进入    开始处理前端触发逻辑
+                    var txt=  "提示文字，提示文字，提示文字，提示文字，提示文字，提示文字";
+                    window.wxc.xcConfirm(txt, window.wxc.xcConfirm.typeEnum.warning);
+                }
+            };
+            //关闭事件
+            socket.onclose = function () {
+                console.log("Socket已关闭");
+            };
+            //发生了错误事件
+            socket.onerror = function () {
+                alert("Socket发生了错误");
+                //此时可以尝试刷新页面
+            }
         }
     }
 </script>

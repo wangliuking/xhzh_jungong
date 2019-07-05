@@ -105,10 +105,10 @@ public class MyFilter extends ZuulFilter{
         }*/
 
         //请求验证
-        if (!RedisTest.searchLoginUser(request.getSession().getId())) {
+        /*if (!RedisTest.searchLoginUser(request.getSession().getId())) {
             String redirectUrl = "/xhzh/login.html";
             sendRedirect(ctx.getResponse(), redirectUrl);
-        }
+        }*/
         return null;
 
     }
