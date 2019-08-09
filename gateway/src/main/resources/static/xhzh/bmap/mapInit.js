@@ -1228,3 +1228,63 @@ function deviceForBar(x,y,z) {
     // 使用刚指定的配置项和数据显示图表。
     myChart.setOption(option);
 }
+
+//setTimeout(getMapTile,1000*10);
+
+var hostList = ["api0.map.bdimg.com","api1.map.bdimg.com","api2.map.bdimg.com"];
+var xmin=32;
+var xmax=159;
+var ymin=0;
+var ymax=95;
+var z=9;
+var count=0;
+
+//获取地图瓦片方法
+function getMapTile() {
+    console.log("开始获取瓦片 xmin = "+xmin);
+    var breaked = false;
+    for(var x=xmin;x<=xmax;x++){
+        for(var y=ymin;y<=ymax;y++){
+            var index = Math.abs(x + y) % 3;
+            if(count<500){
+                console.log("进来了");
+                count++;
+                $.ajax({
+                    type: 'GET',
+                    url: "http://"+hostList[index]+"/customimage/tile?&x="+x+"&y="+y+"&z="+z+"&udt=20180829&scale=1&ak=&styles=t%3Aland%7Ce%3Ag%7Cc%3A%23081734%2Ct%3Abuilding%7Ce%3Ag%7Cc%3A%2304406F%2Ct%3Abuilding%7Ce%3Al%7Cv%3Aoff%2Ct%3Ahighway%7Ce%3Ag%7Cc%3A%23015B99%2Ct%3Ahighway%7Ce%3Al%7Cv%3Aoff%2Ct%3Aarterial%7Ce%3Ag%7Cc%3A%23003051%2Ct%3Aarterial%7Ce%3Al%7Cv%3Aoff%2Ct%3Agreen%7Ce%3Ag%7Cv%3Aoff%2Ct%3Awater%7Ce%3Ag%7Cc%3A%23044161%2Ct%3Asubway%7Ce%3Ag.s%7Cc%3A%23003051%2Ct%3Asubway%7Ce%3Al%7Cv%3Aoff%2Ct%3Arailway%7Ce%3Ag%7Cv%3Aoff%2Ct%3Arailway%7Ce%3Al%7Cv%3Aoff%2Ct%3Aall%7Ce%3Al.t.s%7Cc%3A%23313131%2Ct%3Aall%7Ce%3Al.t.f%7Cc%3A%23FFFFFF%2Ct%3Amanmade%7Ce%3Ag%7Cv%3Aoff%2Ct%3Amanmade%7Ce%3Al%7Cv%3Aoff%2Ct%3Alocal%7Ce%3Ag%7Cv%3Aoff%2Ct%3Alocal%7Ce%3Al%7Cv%3Aoff%2Ct%3Asubway%7Ce%3Ag%7Cl%3A-65%2Ct%3Arailway%7Ce%3Aall%7Cl%3A-40%2Ct%3Aboundary%7Ce%3Ag%7Cc%3A%238b8787%7Cl%3A-29%7Cw%3A1",
+                    async: true,
+                    success: function (data) {
+                    }
+                });
+            }else{
+                console.log("待机中");
+                count=0;
+                xmin=x;
+                breaked = true;
+                break;
+            }
+        }
+
+        if(breaked){
+            break;
+        }
+
+    }
+
+    console.log("结束获取瓦片");
+    if(count == 0){
+        setTimeout(getMapTile,1000*15);
+    }
+
+}
+
+//自定义休眠
+function sleep(numberMillis) {
+    var now = new Date();
+    var exitTime = now.getTime() + numberMillis;
+    while (true) {
+        now = new Date();
+        if (now.getTime() > exitTime)
+            return;
+    }
+}

@@ -86,4 +86,12 @@ public class RTUService {
         return rtuMapper.delCat(rtu_id);
     }
 
+    public int delAlarmNow(int rtu_id){
+        return rtuMapper.delAlarmNow(rtu_id);
+    }
+
+    public int delAlarmHistory(int rtu_id){
+        return rtuMapper.delAlarmHistory(rtu_id);
+    }
+
 }

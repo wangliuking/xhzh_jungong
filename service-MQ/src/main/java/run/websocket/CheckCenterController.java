@@ -35,5 +35,21 @@ public class CheckCenterController {
         }
         return "success";
     }
+
+    //推送前台告知重新登录
+    @ResponseBody
+    @RequestMapping("/socket/pushForLogin/{sid}")
+    public String pushToWebForLogin(@PathVariable String sid) {
+        try {
+            //告知前台需重新登录
+            WebSocketServer.sendInfo("existUser", sid);
+            //切断websocket连接
+            WebSocketServer.closesid(sid);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "failure";
+        }
+        return "success";
+    }
 }
 

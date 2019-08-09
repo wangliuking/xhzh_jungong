@@ -13,7 +13,7 @@ public class RedisTest {
         Jedis jedis = new Jedis(ip,6379);
         jedis.auth("XinHong12345");
         jedis.select(1);
-        //jedis.del("5");
+        //jedis.del("181");
         //jedis.flushDB();
         Set<String> strs = jedis.keys("*");
         System.out.println("strs : "+strs);
@@ -26,6 +26,30 @@ public class RedisTest {
         //查看服务是否运行
         //System.out.println("Server is running: "+jedis.ping());
         jedis.close();
+    }
+
+    /**
+     * 遍历所有值，根据传入用户判断是否删除
+     * @param username
+     * @return
+     */
+    public static boolean searchForDel(String username){
+        boolean status = false;
+        Jedis jedis = new Jedis(ip,6379);
+        jedis.auth("XinHong12345");
+        jedis.select(0);
+        Set<String> strs = jedis.keys("*");
+        Iterator<String> it = strs.iterator();
+        while(it.hasNext()){
+            String key = it.next();
+            String val = jedis.get(key);
+            if(username.equals(val)){
+                jedis.del(key);
+                status = true;
+            }
+        }
+        jedis.close();
+        return status;
     }
 
     public static boolean searchLoginUser(String sessionId){

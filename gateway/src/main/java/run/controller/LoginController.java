@@ -10,10 +10,13 @@ import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+@SuppressWarnings("all")
 @RestController
 public class LoginController {
     @Autowired
     LoginService loginService;
+    @Autowired
+    FeignForMQ feignForMQ;
 
     @RequestMapping("/login")
     public Map<String,Object> login(HttpServletRequest req) {
@@ -27,15 +30,21 @@ public class LoginController {
         System.out.println("返回的userlist为： "+list);
         Map<String,Object> resultMap = new HashMap<>();
         if(list.size()>0){
-            RedisTest.addLoginUser(req.getSession().getId(),username);
-
-            Map<String,Object> logParam = new HashMap<>();
-            logParam.put("type","登录操作");
-            logParam.put("userId",username);
-            logParam.put("ip",getIpAddress(req));
-            logParam.put("content","登录平台");
-            loginService.insertLog(logParam);
-
+            //若redis已存在此用户，删除该用户
+            RedisTest.searchForDel(username);
+            //保持单点登录并通知前台
+            String res = feignForMQ.pushToWebForLogin(username);
+            if("success".equals(res)){
+                RedisTest.addLoginUser(req.getSession().getId(),username);
+                Map<String,Object> logParam = new HashMap<>();
+                logParam.put("type","登录操作");
+                logParam.put("userId",username);
+                logParam.put("ip",getIpAddress(req));
+                logParam.put("content","登录平台");
+                loginService.insertLog(logParam);
+            }else{
+                resultMap.put("result","登录失败");
+            }
             resultMap.put("result","登录成功");
             return resultMap;
         }else{

@@ -33,7 +33,7 @@ public class SendSms {
 				out = SmsTcp.getSocket().getOutputStream();
 				ByteArrayOutputStream bos = new ByteArrayOutputStream();
 				DataOutputStream dos = new DataOutputStream(bos);
-				dos.write(str.getBytes());
+				dos.write(str.getBytes("GB2312"));
 				out.write(bos.toByteArray());
 			}
 		} catch (IOException e) {

@@ -39,7 +39,7 @@ public class SendController {
 
 
     @RequestMapping(value = "/sendRTUConf", method = RequestMethod.POST)
-    public String sendRTUConf(@RequestBody RTU rtu){
+    public void sendRTUConf(@RequestBody RTU rtu){
         log.info("调用mq发送rtu配置信息");
         try {
             JSONObject rtuConfJson = TestRTUConf.rtuConf(rtu);
@@ -48,14 +48,14 @@ public class SendController {
             log.info("要发送底端的信息为： "+rtuConfJson);
             SendUtil.sendMQ(rtuConfJson, Conf.ip_port,Conf.w2z_MQ);
 
-            String result = search(rtuConfJson);
-            return result;
+            /*String result = search(rtuConfJson);
+            return result;*/
 
         }catch (Exception e){
             log.info("发送rtu配置请求到mq出错!!!");
             e.printStackTrace();
         }
-        return "未找到对应返回消息";
+        //return "未找到对应返回消息";
     }
 
     @RequestMapping(value = "/sendRtuDelNewConf", method = RequestMethod.POST)

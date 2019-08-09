@@ -92,4 +92,10 @@ public interface RTUMapper {
 
     @Delete("delete from cathode_config where rtu_id = #{rtu_id}")
     int delCat(int rtu_id);
+
+    @Delete("delete from rtu_alarm_data where rtu_id = #{rtu_id}")
+    int delAlarmNow(int rtu_id);
+
+    @Delete("delete from rtu_alarm_history where rtu_id = #{rtu_id}")
+    int delAlarmHistory(int rtu_id);
 }

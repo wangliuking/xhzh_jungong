@@ -10,5 +10,6 @@ public class Test {
         System.out.println(output);*/
         List<String> output = list.stream().filter((str)->"e".equals(str) && "d".equals(str)).collect(Collectors.toList());
         System.out.println(output);
+
     }
 }

@@ -255,9 +255,7 @@
 
                 <!-- <i class="fa fa-"></i> -->
                 <span class="input-group ">公告&nbsp;<i class="fa fa-volume-up"></i></span>
-                <marquee class="" class="form-control">新平台准备上线了！！！</marquee>
-
-                <!-- <marquee class="form-control">Welcom CSDN!</marquee> -->
+                <marquee class="" class="form-control">当前没有公告！</marquee>
             </div>
             <!--search end-->
 
@@ -271,22 +269,28 @@
             <div class="menu-right">
                 <ul class="notification-menu">
 
-                    <!--<li><a href="#"
-                           class="btn btn-default dropdown-toggle info-number"
-                           data-toggle="dropdown"> <i class="fa fa-envelope-o"></i> <span
-                            class="badge">{{email}}</span> <span>消息</span>
+                    <li style="margin: 5px 10px 0px 0px;"><a href="#" onclick="xh.stopSound()"
+                           data-toggle="dropdown">
+                        <img id="alarmImg" width="36" height="36" src="xhIcon/bell_off.png" />
                     </a>
                         <div class="dropdown-menu dropdown-menu-head pull-right">
-                            <h5 class="title">新消息</h5>
+                            <h6 class="title" style="background: #428bca;">最新告警TOP5</h6>
                             <ul class="dropdown-list normal-list">
-                                <li class="new"><a href="Views/operations/email.html"
-                                                   target="mainframe"> <span class="label label-danger"><i
-                                        class="fa fa-envelope-o"></i></span> <span>你有新消息，请查收</span>
+                                <li class="new" ng-repeat="x in alarmList"><a href="systemAlarmNow.html"
+                                                   target="mainframe">
+                                    <span ng-if="x.type == 1" class="label label-danger" style="padding:2px;"><i
+                                        class="fa fa-bell-o"></i></span>
+                                    <span ng-if="x.type == 2" class="label label-danger" style="padding:2px;"><i
+                                            class="fa fa-bell-o"></i></span>
+                                    <span ng-if="x.type == 3" class="label label-warning" style="padding:2px;"><i
+                                            class="fa fa-bell-o"></i></span>
+                                    <span>{{x.desc}}</span>
+
                                 </a></li>
 
                             </ul>
                         </div>
-                    </li>-->
+                    </li>
 
                     <li><a href="#" class="btn btn-default dropdown-toggle"
                            data-toggle="dropdown"> <img
@@ -387,39 +391,48 @@
         }
     }
 
-    var socket;
-    if (typeof(WebSocket) == "undefined") {
-        console.log("您的浏览器不支持WebSocket");
-    } else {
-        console.log("您的浏览器支持WebSocket");
-        var domain = window.location.host;
-        console.log("当前域名 ： "+domain.split(":",1));
-        var cid = 1;
-        //实现化WebSocket对象，指定要连接的服务器地址与端口  建立连接
-        // 等同于socket = new WebSocket("ws://localhost:8083/checkcentersys/websocket/20");
-        socket = new WebSocket("ws://"+domain.split(":",1)+":8082/websocket/"+cid);
-        //打开事件
-        socket.onopen = function () {
-            console.log("Socket 已打开");
-            //socket.send("这是来自客户端的消息" + location.href + new Date());  };
-            // 获得消息事件
-            socket.onmessage = function (msg) {
-                console.log(msg.data);
-                if(msg.data != "success"){
-                    xh.playSound();
-                    //发现消息进入    开始处理前端触发逻辑
-                    var txt=  "提示文字，提示文字，提示文字，提示文字，提示文字，提示文字";
-                    window.wxc.xcConfirm(txt, window.wxc.xcConfirm.typeEnum.warning);
+    function connectWebSocket(){
+        var sid = loginUser;
+        var socket;
+        if (typeof(WebSocket) == "undefined") {
+            console.log("您的浏览器不支持WebSocket");
+        } else {
+            console.log("您的浏览器支持WebSocket");
+            var domain = window.location.host;
+            console.log("当前域名 ： "+domain.split(":",1));
+            console.log("当前sid : "+sid);
+            //实现化WebSocket对象，指定要连接的服务器地址与端口  建立连接
+            // 等同于socket = new WebSocket("ws://localhost:8083/checkcentersys/websocket/20");
+            socket = new WebSocket("ws://"+domain.split(":",1)+":8082/websocket/"+sid);
+            //打开事件
+            socket.onopen = function () {
+                console.log("Socket 已打开");
+                //socket.send("这是来自客户端的消息" + location.href + new Date());  };
+                // 获得消息事件
+                socket.onmessage = function (msg) {
+                    console.log(msg);
+                    if(msg.data == "existUser"){
+                        alert("已有其他人登录，返回登录界面");
+                        window.location.href = "login.html";
+                        window.parent.location.href = "login.html";
+                    } else if(msg.data != "success" && msg.data != "existUser"){
+                        xh.playSound();
+                        //发现消息进入    开始处理前端触发逻辑
+                        var txt=  msg.data;
+                        window.wxc.xcConfirm(txt, window.wxc.xcConfirm.typeEnum.warning);
+                        var $scope = angular.element(appElement).scope();
+                        $scope.getAlarmTop5();
+                    }
+                };
+                //关闭事件
+                socket.onclose = function () {
+                    console.log("Socket已关闭");e
+                };
+                //发生了错误事件
+                socket.onerror = function () {
+                    alert("Socket发生了错误");
+                    //此时可以尝试刷新页面
                 }
-            };
-            //关闭事件
-            socket.onclose = function () {
-                console.log("Socket已关闭");
-            };
-            //发生了错误事件
-            socket.onerror = function () {
-                alert("Socket发生了错误");
-                //此时可以尝试刷新页面
             }
         }
     }

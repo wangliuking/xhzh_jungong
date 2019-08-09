@@ -9,9 +9,12 @@ import org.springframework.web.bind.annotation.RestController;
 import protobuf.Conf;
 import protobuf.jsonbean.AlarmInfo;
 import run.service.AlarmInfoService;
+import run.websocket.WebSocketServer;
+
 import javax.jms.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -126,129 +129,118 @@ public class Z4WAlarmController {
 
     void openTest(){
         //spd
-        Thread threadSpd = new Thread(()->{
+        new Thread(()->{
             System.out.println("SPDAlarm Running");
                 try {
-                alarmSPD();
+                    commonMethod(Conf.z2w_SPD_alarm,255);
             }catch (Exception e){
                 e.printStackTrace();
             }
-        });
-        threadSpd.start();
+        }).start();
         //spd
         //etcr
-        Thread threadEtcr = new Thread(()->{
+        new Thread(()->{
             System.out.println("EtcrAlarm Running");
             try {
-                alarmEtcr();
+                commonMethod(Conf.z2w_ETCR_alarm,0);
             }catch (Exception e){
                 e.printStackTrace();
             }
-        });
-        threadEtcr.start();
+        }).start();
         //etcr
         //etcrb
-        Thread threadEtcrB = new Thread(()->{
+        new Thread(()->{
             System.out.println("EtcrBAlarm Running");
             try {
-                alarmEtcrB();
+                commonMethod(Conf.z2w_EtcrB_alarm,1);
             }catch (Exception e){
                 e.printStackTrace();
             }
-        });
-        threadEtcrB.start();
+        }).start();
         //etcrb
         //lightning
-        Thread threadLightning = new Thread(()->{
+        new Thread(()->{
             System.out.println("LightningAlarm Running");
             try {
-                alarmLightning();
+                commonMethod(Conf.z2w_Lct_alarm,2);
             }catch (Exception e){
                 e.printStackTrace();
             }
-        });
-        threadLightning.start();
+        }).start();
         //lightning
         //static
-        Thread threadStatic = new Thread(()->{
+        new Thread(()->{
             System.out.println("StaticAlarm Running");
             try {
-                alarmStatic();
+                commonMethod(Conf.z2w_Mems_alarm,4);
             }catch (Exception e){
                 e.printStackTrace();
             }
-        });
-        threadStatic.start();
+        }).start();
         //static
         //rsws
-        Thread threadRsws = new Thread(()->{
+        new Thread(()->{
             System.out.println("RswsAlarm Running");
             try {
-                alarmRsws();
+                commonMethod(Conf.z2w_rsws_alarm,3);
             }catch (Exception e){
                 e.printStackTrace();
             }
-        });
-        threadRsws.start();
+        }).start();
         //rsws
         //svt
-        Thread threadSvt = new Thread(()->{
+        new Thread(()->{
             System.out.println("SvtAlarm Running");
             try {
-                alarmSvt();
+                commonMethod(Conf.z2w_Svt_alarm,5);
             }catch (Exception e){
                 e.printStackTrace();
             }
-        });
-        threadSvt.start();
+        }).start();
         //svt
         //hc
-        Thread threadHc = new Thread(()->{
+        new Thread(()->{
             System.out.println("HcAlarm Running");
             try {
-                alarmHc();
+                commonMethod(Conf.z2w_Hc_alarm,6);
             }catch (Exception e){
                 e.printStackTrace();
             }
-        });
-        threadHc.start();
+        }).start();
         //hc
         //stray
-        Thread threadStray = new Thread(()->{
+        new Thread(()->{
             System.out.println("StrayAlarm Running");
             try {
-                alarmStray();
+                commonMethod(Conf.z2w_Stray_alarm,7);
             }catch (Exception e){
                 e.printStackTrace();
             }
-        });
-        threadStray.start();
+        }).start();
         //stray
         //cat
-        Thread threadCat = new Thread(()->{
+        new Thread(()->{
             System.out.println("CatAlarm Running");
             try {
-                alarmCat();
+                commonMethod(Conf.z2w_Cathode_alarm,8);
             }catch (Exception e){
                 e.printStackTrace();
             }
-        });
-        threadCat.start();
+        }).start();
         //cat
         //rtuAlarm
-        Thread threadRtuAlarm = new Thread(()->{
+        new Thread(()->{
             System.out.println("RTUAlarm Running");
             try {
                 rtuAlarm();
             }catch (Exception e){
                 e.printStackTrace();
             }
-        });
-        threadRtuAlarm.start();
+        }).start();
         //rtuAlarm
     }
 
-    private void alarmSPD() throws Exception {
+    private void commonMethod(String queueName,int dType) throws Exception {
         // 第一步：创建一个ConnectionFactory对象。
         ConnectionFactory connectionFactory = new ActiveMQConnectionFactory(Conf.ip_port);
         // 第二步：从ConnectionFactory对象中获得一个Connection对象。
@@ -258,7 +250,7 @@ public class Z4WAlarmController {
         // 第四步：使用Connection对象创建一个Session对象。
         Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
         // 第五步：使用Session对象创建一个Destination对象。和发送端保持一致queue，并且队列的名称一致。
-        Queue queue = session.createQueue(Conf.z2w_SPD_alarm);
+        Queue queue = session.createQueue(queueName);
         // 第六步：使用Session对象创建一个Consumer对象。
         MessageConsumer consumer = session.createConsumer(queue);
         // 第七步：接收消息。
@@ -271,382 +263,38 @@ public class Z4WAlarmController {
                 AlarmInfo d = (AlarmInfo) JSONObject.toBean(jsonObject, AlarmInfo.class);
                 // 第八步：打印消息
                 System.out.println("==================================");
-                d.setDevicetype(255);
+                d.setDevicetype(dType);
                 System.out.println(d);
                 //调用入库函数
                 alarmInfoService.insertAlarmInfo(d);
                 alarmInfoService.changeAlarmNow(d);
+                String deviceTypeMes = "";
+                if(d.getStatus() == 1){
+                    if(d.getDevicetype() == 0 || d.getDevicetype() == 1){
+                        deviceTypeMes = "地阻";
+                    }else if(d.getDevicetype() == 2){
+                        deviceTypeMes = "雷电流";
+                    }else if(d.getDevicetype() == 3){
+                        deviceTypeMes = "温湿度";
+                    }else if(d.getDevicetype() == 4){
+                        deviceTypeMes = "静电";
+                    }else if(d.getDevicetype() == 5){
+                        deviceTypeMes = "倾斜度";
+                    }else if(d.getDevicetype() == 6){
+                        deviceTypeMes = "电气安全";
+                    }else if(d.getDevicetype() == 7){
+                        deviceTypeMes = "杂散电流";
+                    }else if(d.getDevicetype() == 8){
+                        deviceTypeMes = "阴极保护";
+                    }
+                    //推送告警到前台
+                    String pushMessage = d.getRtuId()+"号RTU"+d.getChanno()+"端口"+d.getDeviceid()+"号"+deviceTypeMes+"设备异常";
+                    WebSocketServer.sendInfo(pushMessage, null);
+                }
                 System.out.println("==================================");
             } catch (JMSException e) {
                 e.printStackTrace();
-            }
-        });
-        //等待键盘输入
-        /*System.in.read();
-        // 第九步：关闭资源
-        consumer.close();
-        session.close();
-        connection.close();*/
-    }
-
-    private void alarmEtcr() throws Exception {
-        // 第一步：创建一个ConnectionFactory对象。
-        ConnectionFactory connectionFactory = new ActiveMQConnectionFactory(Conf.ip_port);
-        // 第二步：从ConnectionFactory对象中获得一个Connection对象。
-        Connection connection = connectionFactory.createConnection();
-        // 第三步：开启连接。调用Connection对象的start方法。
-        connection.start();
-        // 第四步：使用Connection对象创建一个Session对象。
-        Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-        // 第五步：使用Session对象创建一个Destination对象。和发送端保持一致queue，并且队列的名称一致。
-        Queue queue = session.createQueue(Conf.z2w_ETCR_alarm);
-        // 第六步：使用Session对象创建一个Consumer对象。
-        MessageConsumer consumer = session.createConsumer(queue);
-        // 第七步：接收消息。
-        consumer.setMessageListener((message)->{
-            try {
-                TextMessage textMessage = (TextMessage) message;
-                //取消息的内容
-                String text = textMessage.getText();
-                JSONObject jsonObject = JSONObject.fromObject(text);
-                AlarmInfo d = (AlarmInfo) JSONObject.toBean(jsonObject, AlarmInfo.class);
-                // 第八步：打印消息。
-                System.out.println("==================================");
-                d.setDevicetype(0);
-                System.out.println(d);
-                //调用入库函数
-                alarmInfoService.insertAlarmInfo(d);
-                alarmInfoService.changeAlarmNow(d);
-                System.out.println("==================================");
-            } catch (JMSException e) {
-                e.printStackTrace();
-            }
-        });
-        //等待键盘输入
-        /*System.in.read();
-        // 第九步：关闭资源
-        consumer.close();
-        session.close();
-        connection.close();*/
-    }
-
-    private void alarmEtcrB() throws Exception {
-        // 第一步：创建一个ConnectionFactory对象。
-        ConnectionFactory connectionFactory = new ActiveMQConnectionFactory(Conf.ip_port);
-        // 第二步：从ConnectionFactory对象中获得一个Connection对象。
-        Connection connection = connectionFactory.createConnection();
-        // 第三步：开启连接。调用Connection对象的start方法。
-        connection.start();
-        // 第四步：使用Connection对象创建一个Session对象。
-        Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-        // 第五步：使用Session对象创建一个Destination对象。和发送端保持一致queue，并且队列的名称一致。
-        Queue queue = session.createQueue(Conf.z2w_EtcrB_alarm);
-        // 第六步：使用Session对象创建一个Consumer对象。
-        MessageConsumer consumer = session.createConsumer(queue);
-        // 第七步：接收消息。
-        consumer.setMessageListener((message)->{
-            try {
-                TextMessage textMessage = (TextMessage) message;
-                //取消息的内容
-                String text = textMessage.getText();
-                JSONObject jsonObject = JSONObject.fromObject(text);
-                AlarmInfo d = (AlarmInfo) JSONObject.toBean(jsonObject, AlarmInfo.class);
-                // 第八步：打印消息。
-                System.out.println("==================================");
-                d.setDevicetype(1);
-                System.out.println(d);
-                //调用入库函数
-                alarmInfoService.insertAlarmInfo(d);
-                alarmInfoService.changeAlarmNow(d);
-                System.out.println("==================================");
-            } catch (JMSException e) {
-                e.printStackTrace();
-            }
-        });
-        //等待键盘输入
-        /*System.in.read();
-        // 第九步：关闭资源
-        consumer.close();
-        session.close();
-        connection.close();*/
-    }
-
-    private void alarmLightning() throws Exception {
-        // 第一步：创建一个ConnectionFactory对象。
-        ConnectionFactory connectionFactory = new ActiveMQConnectionFactory(Conf.ip_port);
-        // 第二步：从ConnectionFactory对象中获得一个Connection对象。
-        Connection connection = connectionFactory.createConnection();
-        // 第三步：开启连接。调用Connection对象的start方法。
-        connection.start();
-        // 第四步：使用Connection对象创建一个Session对象。
-        Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-        // 第五步：使用Session对象创建一个Destination对象。和发送端保持一致queue，并且队列的名称一致。
-        Queue queue = session.createQueue(Conf.z2w_Lct_alarm);
-        // 第六步：使用Session对象创建一个Consumer对象。
-        MessageConsumer consumer = session.createConsumer(queue);
-        // 第七步：接收消息。
-        consumer.setMessageListener((message)->{
-            try {
-                TextMessage textMessage = (TextMessage) message;
-                //取消息的内容
-                String text = textMessage.getText();
-                JSONObject jsonObject = JSONObject.fromObject(text);
-                AlarmInfo d = (AlarmInfo) JSONObject.toBean(jsonObject, AlarmInfo.class);
-                // 第八步：打印消息。
-                System.out.println("==================================");
-                d.setDevicetype(2);
-                System.out.println(d);
-                //调用入库函数
-                //alarmInfoService.insertAlarmInfo(d);
-                //alarmInfoService.changeAlarmNow(d);
-                System.out.println("==================================");
-            } catch (JMSException e) {
-                e.printStackTrace();
-            }
-        });
-        //等待键盘输入
-        /*System.in.read();
-        // 第九步：关闭资源
-        consumer.close();
-        session.close();
-        connection.close();*/
-    }
-
-    private void alarmStatic() throws Exception {
-        // 第一步：创建一个ConnectionFactory对象。
-        ConnectionFactory connectionFactory = new ActiveMQConnectionFactory(Conf.ip_port);
-        // 第二步：从ConnectionFactory对象中获得一个Connection对象。
-        Connection connection = connectionFactory.createConnection();
-        // 第三步：开启连接。调用Connection对象的start方法。
-        connection.start();
-        // 第四步：使用Connection对象创建一个Session对象。
-        Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-        // 第五步：使用Session对象创建一个Destination对象。和发送端保持一致queue，并且队列的名称一致。
-        Queue queue = session.createQueue(Conf.z2w_Mems_alarm);
-        // 第六步：使用Session对象创建一个Consumer对象。
-        MessageConsumer consumer = session.createConsumer(queue);
-        // 第七步：接收消息。
-        consumer.setMessageListener((message)->{
-            try {
-                TextMessage textMessage = (TextMessage) message;
-                //取消息的内容
-                String text = textMessage.getText();
-                JSONObject jsonObject = JSONObject.fromObject(text);
-                AlarmInfo d = (AlarmInfo) JSONObject.toBean(jsonObject, AlarmInfo.class);
-                // 第八步：打印消息。
-                System.out.println("==================================");
-                d.setDevicetype(4);
-                System.out.println(d);
-                //调用入库函数
-                alarmInfoService.insertAlarmInfo(d);
-                alarmInfoService.changeAlarmNow(d);
-                System.out.println("==================================");
-            } catch (JMSException e) {
-                e.printStackTrace();
-            }
-        });
-        //等待键盘输入
-        /*System.in.read();
-        // 第九步：关闭资源
-        consumer.close();
-        session.close();
-        connection.close();*/
-    }
-
-    private void alarmRsws() throws Exception {
-        // 第一步：创建一个ConnectionFactory对象。
-        ConnectionFactory connectionFactory = new ActiveMQConnectionFactory(Conf.ip_port);
-        // 第二步：从ConnectionFactory对象中获得一个Connection对象。
-        Connection connection = connectionFactory.createConnection();
-        // 第三步：开启连接。调用Connection对象的start方法。
-        connection.start();
-        // 第四步：使用Connection对象创建一个Session对象。
-        Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-        // 第五步：使用Session对象创建一个Destination对象。和发送端保持一致queue，并且队列的名称一致。
-        Queue queue = session.createQueue(Conf.z2w_rsws_alarm);
-        // 第六步：使用Session对象创建一个Consumer对象。
-        MessageConsumer consumer = session.createConsumer(queue);
-        // 第七步：接收消息。
-        consumer.setMessageListener((message)->{
-            try {
-                TextMessage textMessage = (TextMessage) message;
-                //取消息的内容
-                String text = textMessage.getText();
-                JSONObject jsonObject = JSONObject.fromObject(text);
-                AlarmInfo d = (AlarmInfo) JSONObject.toBean(jsonObject, AlarmInfo.class);
-                // 第八步：打印消息。
-                System.out.println("==================================");
-                d.setDevicetype(3);
-                System.out.println(d);
-                //调用入库函数
-                alarmInfoService.insertAlarmInfo(d);
-                alarmInfoService.changeAlarmNow(d);
-                System.out.println("==================================");
-            } catch (JMSException e) {
-                e.printStackTrace();
-            }
-        });
-        //等待键盘输入
-        /*System.in.read();
-        // 第九步：关闭资源
-        consumer.close();
-        session.close();
-        connection.close();*/
-    }
-
-    private void alarmSvt() throws Exception {
-        // 第一步：创建一个ConnectionFactory对象。
-        ConnectionFactory connectionFactory = new ActiveMQConnectionFactory(Conf.ip_port);
-        // 第二步：从ConnectionFactory对象中获得一个Connection对象。
-        Connection connection = connectionFactory.createConnection();
-        // 第三步：开启连接。调用Connection对象的start方法。
-        connection.start();
-        // 第四步：使用Connection对象创建一个Session对象。
-        Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-        // 第五步：使用Session对象创建一个Destination对象。和发送端保持一致queue，并且队列的名称一致。
-        Queue queue = session.createQueue(Conf.z2w_Svt_alarm);
-        // 第六步：使用Session对象创建一个Consumer对象。
-        MessageConsumer consumer = session.createConsumer(queue);
-        // 第七步：接收消息。
-        consumer.setMessageListener((message)->{
-            try {
-                TextMessage textMessage = (TextMessage) message;
-                //取消息的内容
-                String text = textMessage.getText();
-                JSONObject jsonObject = JSONObject.fromObject(text);
-                AlarmInfo d = (AlarmInfo) JSONObject.toBean(jsonObject, AlarmInfo.class);
-                // 第八步：打印消息。
-                System.out.println("==================================");
-                d.setDevicetype(5);
-                System.out.println(d);
-                //调用入库函数
-                alarmInfoService.insertAlarmInfo(d);
-                alarmInfoService.changeAlarmNow(d);
-                System.out.println("==================================");
-            } catch (JMSException e) {
-                e.printStackTrace();
-            }
-        });
-        //等待键盘输入
-        /*System.in.read();
-        // 第九步：关闭资源
-        consumer.close();
-        session.close();
-        connection.close();*/
-    }
-
-    private void alarmHc() throws Exception {
-        // 第一步：创建一个ConnectionFactory对象。
-        ConnectionFactory connectionFactory = new ActiveMQConnectionFactory(Conf.ip_port);
-        // 第二步：从ConnectionFactory对象中获得一个Connection对象。
-        Connection connection = connectionFactory.createConnection();
-        // 第三步：开启连接。调用Connection对象的start方法。
-        connection.start();
-        // 第四步：使用Connection对象创建一个Session对象。
-        Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-        // 第五步：使用Session对象创建一个Destination对象。和发送端保持一致queue，并且队列的名称一致。
-        Queue queue = session.createQueue(Conf.z2w_Hc_alarm);
-        // 第六步：使用Session对象创建一个Consumer对象。
-        MessageConsumer consumer = session.createConsumer(queue);
-        // 第七步：接收消息。
-        consumer.setMessageListener((message)->{
-            try {
-                TextMessage textMessage = (TextMessage) message;
-                //取消息的内容
-                String text = textMessage.getText();
-                JSONObject jsonObject = JSONObject.fromObject(text);
-                AlarmInfo d = (AlarmInfo) JSONObject.toBean(jsonObject, AlarmInfo.class);
-                // 第八步：打印消息。
-                System.out.println("==================================");
-                d.setDevicetype(6);
-                System.out.println(d);
-                //调用入库函数
-                alarmInfoService.insertAlarmInfo(d);
-                alarmInfoService.changeAlarmNow(d);
-                System.out.println("==================================");
-            } catch (JMSException e) {
-                e.printStackTrace();
-            }
-        });
-        //等待键盘输入
-        /*System.in.read();
-        // 第九步：关闭资源
-        consumer.close();
-        session.close();
-        connection.close();*/
-    }
-
-    private void alarmStray() throws Exception {
-        // 第一步：创建一个ConnectionFactory对象。
-        ConnectionFactory connectionFactory = new ActiveMQConnectionFactory(Conf.ip_port);
-        // 第二步：从ConnectionFactory对象中获得一个Connection对象。
-        Connection connection = connectionFactory.createConnection();
-        // 第三步：开启连接。调用Connection对象的start方法。
-        connection.start();
-        // 第四步：使用Connection对象创建一个Session对象。
-        Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-        // 第五步：使用Session对象创建一个Destination对象。和发送端保持一致queue，并且队列的名称一致。
-        Queue queue = session.createQueue(Conf.z2w_Stray_alarm);
-        // 第六步：使用Session对象创建一个Consumer对象。
-        MessageConsumer consumer = session.createConsumer(queue);
-        // 第七步：接收消息。
-        consumer.setMessageListener((message)->{
-            try {
-                TextMessage textMessage = (TextMessage) message;
-                //取消息的内容
-                String text = textMessage.getText();
-                JSONObject jsonObject = JSONObject.fromObject(text);
-                AlarmInfo d = (AlarmInfo) JSONObject.toBean(jsonObject, AlarmInfo.class);
-                // 第八步：打印消息。
-                System.out.println("==================================");
-                d.setDevicetype(7);
-                System.out.println(d);
-                //调用入库函数
-                alarmInfoService.insertAlarmInfo(d);
-                alarmInfoService.changeAlarmNow(d);
-                System.out.println("==================================");
-            } catch (JMSException e) {
-                e.printStackTrace();
-            }
-        });
-        //等待键盘输入
-        /*System.in.read();
-        // 第九步：关闭资源
-        consumer.close();
-        session.close();
-        connection.close();*/
-    }
-
-    private void alarmCat() throws Exception {
-        // 第一步：创建一个ConnectionFactory对象。
-        ConnectionFactory connectionFactory = new ActiveMQConnectionFactory(Conf.ip_port);
-        // 第二步：从ConnectionFactory对象中获得一个Connection对象。
-        Connection connection = connectionFactory.createConnection();
-        // 第三步：开启连接。调用Connection对象的start方法。
-        connection.start();
-        // 第四步：使用Connection对象创建一个Session对象。
-        Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-        // 第五步：使用Session对象创建一个Destination对象。和发送端保持一致queue，并且队列的名称一致。
-        Queue queue = session.createQueue(Conf.z2w_Cathode_alarm);
-        // 第六步：使用Session对象创建一个Consumer对象。
-        MessageConsumer consumer = session.createConsumer(queue);
-        // 第七步：接收消息。
-        consumer.setMessageListener((message)->{
-            try {
-                TextMessage textMessage = (TextMessage) message;
-                //取消息的内容
-                String text = textMessage.getText();
-                JSONObject jsonObject = JSONObject.fromObject(text);
-                AlarmInfo d = (AlarmInfo) JSONObject.toBean(jsonObject, AlarmInfo.class);
-                // 第八步：打印消息。
-                System.out.println("==================================");
-                d.setDevicetype(8);
-                System.out.println(d);
-                //调用入库函数
-                alarmInfoService.insertAlarmInfo(d);
-                alarmInfoService.changeAlarmNow(d);
-                System.out.println("==================================");
-            } catch (JMSException e) {
+            } catch (IOException e){
                 e.printStackTrace();
             }
         });
@@ -685,27 +333,50 @@ public class Z4WAlarmController {
                 System.out.println("==================================");
                 //调用更新函数
                 //判断是设备离线还是rtu离线
+                String deviceTypeMes = "";
                 if(d.getAlarmType() == 1){//设备离线
                     if(d.getDevicetype() == 0 || d.getDevicetype() == 1){
                         alarmInfoService.updateEtcrNow(d);
+                        deviceTypeMes = "地阻";
                     }else if(d.getDevicetype() == 2){
                         alarmInfoService.updateLightningNow(d);
+                        deviceTypeMes = "雷电流";
                     }else if(d.getDevicetype() == 3){
                         alarmInfoService.updateRswsNow(d);
+                        deviceTypeMes = "温湿度";
                     }else if(d.getDevicetype() == 4){
                         alarmInfoService.updateStaticNow(d);
+                        deviceTypeMes = "静电";
                     }else if(d.getDevicetype() == 5){
                         alarmInfoService.updateSvtNow(d);
+                        deviceTypeMes = "倾斜度";
                     }else if(d.getDevicetype() == 6){
                         alarmInfoService.updateHcNow(d);
+                        deviceTypeMes = "电气安全";
                     }else if(d.getDevicetype() == 7){
                         alarmInfoService.updateStrayNow(d);
+                        deviceTypeMes = "杂散电流";
                     }else if(d.getDevicetype() == 8){
                         alarmInfoService.updateCatNow(d);
+                        deviceTypeMes = "阴极保护";
                     }
+                }
+                if(d.getStatus() == 1){
+                    String pushMessage;
+                    //推送告警到前台
+                    if(d.getAlarmType() == 1){//设备离线
+                        pushMessage = d.getRtuId()+"号RTU"+d.getChanno()+"端口"+d.getDeviceid()+"号"+deviceTypeMes+"设备离线";
+                    }else if(d.getAlarmType() == 2){//RTU离线
+                        pushMessage = d.getRtuId()+"号RTU离线";
+                    }else{
+                        pushMessage = "其他告警";
+                    }
+                    WebSocketServer.sendInfo(pushMessage, null);
                 }
 
             } catch (JMSException e) {
+                e.printStackTrace();
+            } catch (IOException e){
                 e.printStackTrace();
             }
         });

@@ -51,6 +51,22 @@ public class WebSocketServer {
     }
 
     /**
+     * 关闭指定连接
+     */
+    public static void closesid(String sid){
+        for (WebSocketServer item : webSocketSet) {
+            try {
+                //这里可以设定只推送给这个sid的，为null则全部推送
+                if (sid != null && item.sid.equals(sid)) {
+                    item.session.close();
+                }
+            } catch (IOException e) {
+                continue;
+            }
+        }
+    }
+
+    /**
      * 收到客户端消息后调用的方法
      *
      * @param message 客户端发送过来的消息
