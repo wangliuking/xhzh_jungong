@@ -143,6 +143,37 @@ public class LoginController {
         return ip;
     }
 
+    @RequestMapping(value = "/selectMarquee",method = RequestMethod.GET)
+    public Map<String,Object> selectMarquee(HttpServletRequest req) {
+        Map<String,Object> param = new HashMap<>();
+        param.put("data",RedisTest.searchMarquee());
+        return param;
+    }
+
+    @RequestMapping(value = "/updateMarquee",method = RequestMethod.GET)
+    public void updateMarquee(HttpServletRequest req) {
+        String marquee = req.getParameter("marquee");
+        RedisTest.updateMarquee(marquee);
+    }
+
+    @RequestMapping(value = "/selectAlarmConf",method = RequestMethod.GET)
+    public Map<String,Object> selectAlarmConf(HttpServletRequest req) {
+        Map<String,Object> param = new HashMap<>();
+        param.put("window",RedisTest.searchAlarmConf(1));
+        param.put("voice",RedisTest.searchAlarmConf(2));
+        return param;
+    }
+
+    @RequestMapping(value = "/saveAlarmConf",method = RequestMethod.POST)
+    @ResponseBody
+    public String saveAlarmConf(@RequestBody Map<String,String> param) {
+        System.out.println("==========================");
+        System.out.println(param);
+        System.out.println("==========================");
+        RedisTest.saveAlarmConf(param);
+        return "success";
+    }
+
     public static void main(String[] args) {
         LoginController loginController = new LoginController();
         String path = loginController.getClass().getResource("/").getPath();

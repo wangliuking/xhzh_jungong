@@ -254,8 +254,10 @@
                 <!-- <input type="text" class="form-control" name="keyword" placeholder="公告栏" /> -->
 
                 <!-- <i class="fa fa-"></i> -->
-                <span class="input-group ">公告&nbsp;<i class="fa fa-volume-up"></i></span>
-                <marquee class="" class="form-control">当前没有公告！</marquee>
+                <a href="#" onclick="xh.showMarqueeEdit()"><span class="input-group">公告&nbsp;<i class="fa fa-volume-up"></i></span></a>
+                <input ng-blur="updateMarquee()" id="marqueeInfo" name="marqueeInfo" value="" style="display: none;"/>
+
+                <marquee id="marqueeShow" class="" class="form-control" style="display: block;"></marquee>
             </div>
             <!--search end-->
 

@@ -2,8 +2,7 @@ package run.redis;
 
 import redis.clients.jedis.Jedis;
 
-import java.util.Iterator;
-import java.util.Set;
+import java.util.*;
 
 public class RedisTest {
     private static String ip = "localhost";
@@ -96,6 +95,59 @@ public class RedisTest {
         jedis.auth("XinHong12345");
         jedis.select(0);
         jedis.del(sessionId);
+        jedis.close();
+    }
+
+    //查询公告栏
+    public static String searchMarquee(){
+        Jedis jedis = new Jedis(ip,6379);
+        jedis.auth("XinHong12345");
+        jedis.select(3);
+        String res = jedis.get("marquee");
+        jedis.close();
+        return res;
+    }
+
+    //修改公告栏
+    public static void updateMarquee(String marquee){
+        Jedis jedis = new Jedis(ip,6379);
+        jedis.auth("XinHong12345");
+        jedis.select(3);
+        jedis.del("marquee");
+        jedis.set("marquee",marquee);
+        jedis.close();
+    }
+
+    //查询弹窗或声音告警配置
+    public static Map<String,String> searchAlarmConf(int type){
+        String alarmType = "";
+        if(type == 1){
+            //弹窗配置
+            alarmType = "windowType";
+        }else if(type == 2){
+            //声音配置
+            alarmType = "voiceType";
+        }
+        Jedis jedis = new Jedis(ip,6379);
+        jedis.auth("XinHong12345");
+        jedis.select(3);
+        Map<String,String> map = new HashMap<>();
+        for(int i=1;i<4;i++){
+            String key = alarmType+i;
+            map.put(key,jedis.get(key));
+        }
+        jedis.close();
+        return map;
+    }
+
+    //保存弹窗或声音告警配置
+    public static void saveAlarmConf(Map<String,String> map){
+        Jedis jedis = new Jedis(ip,6379);
+        jedis.auth("XinHong12345");
+        jedis.select(3);
+        for(String key : map.keySet()){
+            jedis.set(key,map.get(key));
+        }
         jedis.close();
     }
 
