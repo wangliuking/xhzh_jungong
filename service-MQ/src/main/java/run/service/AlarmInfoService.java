@@ -72,4 +72,12 @@ public class AlarmInfoService {
     public int updateCatNow(AlarmInfo alarmInfo){
         return alarmInfoMapper.updateCatNow(alarmInfo);
     }
+
+    public Map<String,Object> smsConf(){
+        return alarmInfoMapper.smsConf();
+    }
+
+    public int smsSave(Map<String,Object> param){
+        return alarmInfoMapper.smsSave(param);
+    }
 }

@@ -302,6 +302,13 @@ xh.refresh = function() {
 var myChart;
 //站点统计图
 function deviceHistory(data) {
+    //获取统计图名称
+    var a = $("#siteName").find("option:selected").text();
+    var b = $("#rtuName").find("option:selected").text();
+    var c = $("#deviceName").find("option:selected").text();
+    var d = $("#deviceId").find("option:selected").text();
+    var imageName = a+b+"号RTU"+d+"号"+c;
+
     //遍历时间
     var timeList = [];
     for(var i=0;i<data.length;i++){
@@ -556,7 +563,10 @@ function deviceHistory(data) {
                 dataView: {readOnly: false},
                 magicType: {type: ['line', 'bar']},
                 restore: {},
-                saveAsImage: {}
+                saveAsImage: {
+                    type: 'png',
+                    name: imageName
+                }
             }
         },
         xAxis:  [{

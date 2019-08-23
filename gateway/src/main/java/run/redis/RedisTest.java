@@ -127,6 +127,9 @@ public class RedisTest {
         }else if(type == 2){
             //声音配置
             alarmType = "voiceType";
+        }else if(type == 3){
+            //声音配置
+            alarmType = "smsType";
         }
         Jedis jedis = new Jedis(ip,6379);
         jedis.auth("XinHong12345");

@@ -20,6 +20,9 @@ import java.util.TimerTask;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import run.controller.Z4WAlarmController;
+import run.service.AlarmInfoService;
 import run.util.FunUtil;
 
 
@@ -27,8 +30,8 @@ public class SmsTcp extends Thread {
     private static Socket socket;
     private static int timeout = 1 * 60 * 1000;
     protected final Log log = LogFactory.getLog(SmsTcp.class);
-    private String ip;
-    private int port;
+    public static String ip;
+    public static int port;
     private FunUtil func = new FunUtil();
     private boolean connected = false;
     private static String recvStr = "";
@@ -65,8 +68,7 @@ public class SmsTcp extends Thread {
     public void connect() {
         if (socket == null || socket.isClosed() || !socket.isConnected()) {
             socket = new Socket();
-            ip = "192.168.0.7";
-            port = 999;
+            System.out.println("ip: ==================== "+ip+" port:=================="+port);
             InetSocketAddress addr = new InetSocketAddress(ip, port);
             try {
                 socket.connect(addr, timeout);

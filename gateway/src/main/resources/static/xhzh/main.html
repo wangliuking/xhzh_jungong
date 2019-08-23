@@ -418,10 +418,18 @@
                         window.location.href = "login.html";
                         window.parent.location.href = "login.html";
                     } else if(msg.data != "success" && msg.data != "existUser"){
-                        xh.playSound();
-                        //发现消息进入    开始处理前端触发逻辑
-                        var txt=  msg.data;
-                        window.wxc.xcConfirm(txt, window.wxc.xcConfirm.typeEnum.warning);
+                        var origin = msg.data;
+                        var sourceData = origin.substring(0,origin.length-2);
+                        var windowType = origin.substring(origin.length-2,origin.length-1);
+                        var voiceType = origin.substr(origin.length-1,1);
+                        if(parseInt(voiceType) == 1){
+                            xh.playSound();
+                        }
+                        if(parseInt(windowType) == 1){
+                            //发现消息进入    开始处理前端触发逻辑
+                            var txt = sourceData;
+                            window.wxc.xcConfirm(txt, window.wxc.xcConfirm.typeEnum.warning);
+                        }
                         var $scope = angular.element(appElement).scope();
                         $scope.getAlarmTop5();
                     }

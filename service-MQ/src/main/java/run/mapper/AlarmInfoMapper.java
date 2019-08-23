@@ -137,4 +137,10 @@ public interface AlarmInfoMapper {
 
     @Update("update cathode_now_data set cathode_state=#{status} where rtu_id=#{rtuId} and cathode_id=#{deviceid} and rtu_channel=#{channo}")
     int updateCatNow(AlarmInfo alarmInfo);
+
+    @Select("select * from sms_conf")
+    Map<String,Object> smsConf();
+
+    @Update("update sms_conf set ip=#{ip},port=#{port},phone=#{phone} where id=1")
+    int smsSave(Map<String,Object> param);
 }

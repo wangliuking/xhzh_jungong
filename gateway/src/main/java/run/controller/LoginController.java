@@ -161,6 +161,7 @@ public class LoginController {
         Map<String,Object> param = new HashMap<>();
         param.put("window",RedisTest.searchAlarmConf(1));
         param.put("voice",RedisTest.searchAlarmConf(2));
+        param.put("sms",RedisTest.searchAlarmConf(3));
         return param;
     }
 

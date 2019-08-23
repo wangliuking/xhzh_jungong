@@ -3,12 +3,13 @@ package run.controller;
 import net.sf.json.JSONObject;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import protobuf.Conf;
 import protobuf.jsonbean.AlarmInfo;
+import run.redis.RedisTest;
 import run.service.AlarmInfoService;
+import run.smsnet.SendSms;
+import run.smsnet.SmsTcp;
 import run.websocket.WebSocketServer;
 
 import javax.jms.*;
@@ -125,6 +126,25 @@ public class Z4WAlarmController {
         listMap.put("totals",count);
         return listMap;
 
+    }
+
+    @RequestMapping(value = "/selectSmsConf",method = RequestMethod.GET)
+    public Map<String,Object> selectSmsConf (){
+        Map<String,Object> param = new HashMap<>();
+        param.put("smsConf",alarmInfoService.smsConf());
+        return param;
+    }
+
+    @RequestMapping(value = "/saveSmsConf",method = RequestMethod.POST)
+    @ResponseBody
+    public Map<String,Object> saveSmsConf(@RequestBody Map<String,Object> param) {
+        System.out.println("==========================");
+        System.out.println(param);
+        System.out.println("==========================");
+        alarmInfoService.smsSave(param);
+        Map<String,Object> res = new HashMap<>();
+        res.put("smsConf",alarmInfoService.smsConf());
+        return res;
     }
 
     void openTest(){
@@ -287,9 +307,14 @@ public class Z4WAlarmController {
                     }else if(d.getDevicetype() == 8){
                         deviceTypeMes = "阴极保护";
                     }
+                    String str = RedisTest.searchAlarmTypeConf("windowType3")+RedisTest.searchAlarmTypeConf("voiceType3");
                     //推送告警到前台
-                    String pushMessage = d.getRtuId()+"号RTU"+d.getChanno()+"端口"+d.getDeviceid()+"号"+deviceTypeMes+"设备异常";
+                    String tempMsg = d.getRtuId()+"号RTU"+d.getChanno()+"端口"+d.getDeviceid()+"号"+deviceTypeMes+"设备异常";
+                    String pushMessage = tempMsg+str;
                     WebSocketServer.sendInfo(pushMessage, null);
+                    if(RedisTest.searchAlarmTypeConf("smsType3").equals("1")){
+                        sendSms(tempMsg);
+                    }
                 }
                 System.out.println("==================================");
             } catch (JMSException e) {
@@ -365,9 +390,18 @@ public class Z4WAlarmController {
                     String pushMessage;
                     //推送告警到前台
                     if(d.getAlarmType() == 1){//设备离线
-                        pushMessage = d.getRtuId()+"号RTU"+d.getChanno()+"端口"+d.getDeviceid()+"号"+deviceTypeMes+"设备离线";
+                        String str = RedisTest.searchAlarmTypeConf("windowType1")+RedisTest.searchAlarmTypeConf("voiceType1");
+                        String tempMsg = d.getRtuId()+"号RTU"+d.getChanno()+"端口"+d.getDeviceid()+"号"+deviceTypeMes+"设备离线";
+                        pushMessage = tempMsg+str;
+                        if(RedisTest.searchAlarmTypeConf("smsType1").equals("1")){
+                            sendSms(tempMsg);
+                        }
                     }else if(d.getAlarmType() == 2){//RTU离线
-                        pushMessage = d.getRtuId()+"号RTU离线";
+                        String str = RedisTest.searchAlarmTypeConf("windowType2")+RedisTest.searchAlarmTypeConf("voiceType2");
+                        pushMessage = d.getRtuId()+"号RTU离线"+str;
+                        if(RedisTest.searchAlarmTypeConf("smsType2").equals("1")){
+                            sendSms(d.getRtuId()+"号RTU离线");
+                        }
                     }else{
                         pushMessage = "其他告警";
                     }
@@ -386,6 +420,33 @@ public class Z4WAlarmController {
         consumer.close();
         session.close();
         connection.close();*/
+    }
+
+    public void sendSms(String msg){
+        System.out.println("ready to send");
+        AlarmInfoService alarmInfoService = new AlarmInfoService();
+        Map<String,Object> paramMap = alarmInfoService.smsConf();
+        String phone = paramMap.get("phone")+"";
+        String[] strs = phone.split(";");
+        SendSms sendSms = new SendSms();
+        System.out.println("AT^SMS="+strs+" \""+msg+"\"\n");
+        try {
+            Thread.sleep(5000);
+            if (SmsTcp.getSocket().isConnected()) {
+                sendSms.sendAt("+++");
+                Thread.sleep(1000);
+                sendSms.sendAt("AT\n");
+                if(strs.length>0){
+                    for(int i=0;i<strs.length;i++){
+                        Thread.sleep(1000);
+                        sendSms.sendAt("AT^SMS="+strs[i]+" \""+msg+"\"\n");
+                    }
+                }
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }

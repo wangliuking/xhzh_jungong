@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.Map;
 
 public class RedisTest {
+    private static String ip = "localhost";
+
     public static void main(String[] args) {
         //连接本地的 Redis 服务
         Jedis jedis = new Jedis("localhost",6379);
@@ -174,4 +176,16 @@ public class RedisTest {
 
         jedis.close();
     }
+
+    //根据告警类型查询弹窗或声音配置
+    public static String searchAlarmTypeConf(String key){
+        Jedis jedis = new Jedis(ip,6379);
+        jedis.auth("XinHong12345");
+        jedis.select(3);
+        Map<String,String> map = new HashMap<>();
+        String val = jedis.get(key);
+        jedis.close();
+        return val;
+    }
+
 }
