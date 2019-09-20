@@ -66,6 +66,7 @@ public class SecurityConf extends WebSecurityConfigurerAdapter {
             .antMatchers("/alarm/**").permitAll()
             .antMatchers("/mq/**").permitAll()
             .antMatchers("/total/**").permitAll()
+            .antMatchers("/data/**").permitAll()
             .anyRequest()//所有请求
             .authenticated();//所有请求都进行权限验证
         http.csrf().disable();

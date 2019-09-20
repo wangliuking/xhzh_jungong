@@ -93,6 +93,31 @@
           background:#ccc;
           margin:0px;
         } */
+
+		.myModal-header{
+			border:0px;
+			height:auto;
+		}
+		.myModal-footer{
+			border:none;
+		}
+		.form-group label {
+			font-weight: normal;
+			color: white;
+		}
+		.myContent{
+			background: url('images/bk.png') no-repeat;
+			background-size:100% 100%;
+			color: white;
+		}
+		#myModalLabel{
+			text-align: center;
+			font-size: 0.8vw;
+			color: white;
+		}
+		.myBody{
+			font-size: 16px;
+		}
 	</style>
 </head>
 <body ng-app="app" ng-controller="screen"
@@ -104,6 +129,150 @@
 		<img src="images/mask-loading08.gif"/>
 	</div>
 </div>
+<div class="modal fade" id="detail" tabindex="-1" role="dialog" style="background: none;"
+	 aria-hidden="true">
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content myContent">
+			<div class="modal-header myModal-header">
+				<!--<h5 class="modal-title" id="myModalLabel">RTU-{{rtuData.rtu_id}}</h5>-->
+			</div>
+			<div class="modal-body myBody">
+				<div class="row">
+					<div class="col-md-3">
+						<div class="form-group col-md-12">
+							基本信息
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-3">
+						<div class="form-group col-md-12">
+							<label>RTU-ID</label>&nbsp;<span class="text-info">[*]</span> <input
+								type="text" ng-value="rtuData.rtu_id" class="form-control" style="border: none;background: none;color: yellow;" readonly="readonly">
+						</div>
+					</div>
+					<div class="col-md-3">
+						<div class="form-group col-md-12">
+							<label>RTU-IP</label>&nbsp;<span class="text-info">[*]</span> <input
+								type="text" ng-value="rtuData.rtu_ip" class="form-control" style="border: none;background: none;color: yellow;" readonly="readonly">
+						</div>
+					</div>
+					<div class="col-md-3">
+						<div class="form-group col-md-12">
+							<label>RTU端口</label>&nbsp;<span class="text-info">[*]</span> <input
+								type="text" ng-value="rtuData.rtu_port" class="form-control" style="border: none;background: none;color: yellow;" readonly="readonly">
+						</div>
+					</div>
+					<div class="col-md-3">
+						<div class="form-group col-md-12">
+							<label>综合{{healthOrRisk}}得分</label>&nbsp;<span class="text-info">[*]</span> <input
+								type="text" ng-value="rtuScore" class="form-control" style="border: none;background: none;color: yellow;" readonly="readonly">
+						</div>
+					</div>
+
+				</div>
+				<hr style=" border-top:1px dashed #28beff;" ng-show="spdList.length>0"/>
+				<div class="row">
+					<div class="col-md-3" ng-show="spdList.length>0">
+						<div class="form-group col-md-12">
+							SPD
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-3" ng-repeat="x in spdList">
+						<div class="form-group col-md-12">
+							<label>第{{x.number}}路{{healthOrRisk}}</label>&nbsp;<span class="text-info">[*]</span> <input
+								type="text" ng-value="x.value" class="form-control" style="border: none;background: none;color: yellow;" readonly="readonly">
+						</div>
+					</div>
+				</div>
+				<hr style=" border-top:1px dashed #28beff;" ng-show="etcrList.length>0"/>
+				<div class="row" ng-show="etcrList.length>0">
+					<div class="col-md-3">
+						<div class="form-group col-md-12">
+							接地电阻
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-3" ng-repeat="x in etcrList">
+						<div class="form-group col-md-12">
+							<label>监测点{{x.number}}{{healthOrRisk}}</label>&nbsp;<span class="text-info">[*]</span> <input
+								type="text" ng-value="x.value" class="form-control" style="border: none;background: none;color: yellow;" readonly="readonly">
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer myModal-footer"></div>
+		</div>
+		<!-- /.modal-content -->
+	</div>
+	<!-- /.modal -->
+</div>
+<!--<div class="modal fade" id="detail" tabindex="-1" role="dialog" style="background: none;"
+	 aria-hidden="true">
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+			<div class="modal-header myModal-header">
+				<h5 class="modal-title myModal-header-font" id="myModalLabel">RTU健康度详细情况</h5>
+			</div>
+			<div class="modal-body myModal-body">
+				<div class="row">
+					<div class="col-md-3">
+						<div class="form-group col-md-12">
+							SPD
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-3">
+						<div class="form-group col-md-12">
+							<label>健康度得分</label>&nbsp;<span class="text-info">[*]</span> <input
+								type="text" ng-value="" class="form-control" name="site_name" style="border: 1px solid blue;">
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-3">
+						<div class="form-group col-md-12">
+							接地电阻
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-3">
+						<div class="form-group col-md-12">
+							<label>监测点1</label>&nbsp;<span class="text-danger">[*]</span> <input
+								type="text" ng-value="" class="form-control" name="site_name" style="border: 1px solid blue;">
+						</div>
+					</div>
+					<div class="col-md-3">
+						<div class="form-group col-md-12">
+							<label>监测点2</label>&nbsp;<span class="text-danger">[*]</span> <input
+								type="text" ng-value="" class="form-control" name="site_name" style="border: 1px solid blue;">
+						</div>
+					</div>
+					<div class="col-md-3">
+						<div class="form-group col-md-12">
+							<label>监测点3</label>&nbsp;<span class="text-danger">[*]</span> <input
+								type="text" ng-value="" class="form-control" name="site_name" style="border: 1px solid blue;">
+						</div>
+					</div>
+					<div class="col-md-3">
+						<div class="form-group col-md-12">
+							<label>监测点4</label>&nbsp;<span class="text-danger">[*]</span> <input
+								type="text" ng-value="" class="form-control" name="site_name" style="border: 1px solid blue;">
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer myModal-footer"></div>
+		</div>
+		&lt;!&ndash; /.modal-content &ndash;&gt;
+	</div>
+	&lt;!&ndash; /.modal &ndash;&gt;
+</div>-->
 
 <!--<a href="main.html" target="_top"><div id="goToIndex">进入首页</div></a>-->
 <div id="logoTemp" style="position: fixed;top:1%;left:45%;z-index:1000;">
@@ -167,13 +336,13 @@
 		<div class="col-md-2 lg-left" style="padding-left:50px;">
 			<div class="row">
 				<div class="col-md-12 lg-box" style="margin-top:5px;">
-					<p>站点设备异常TOP5</p>
+					<p>RTU健康度TOP5</p>
 					<div id="deviceWarning-top5" style="background-image:url('images/332211.png');background-size:100% 100%;;background-repeat:no-repeat;"></div>
 				</div>
 			</div>
 			<div class="row">
 				<div class="col-md-12 lg-box" style="margin-top:5px">
-					<p>站点设备离线TOP5</p>
+					<p>RTU风险度TOP5</p>
 					<div id="deviceOff-top5" style="background-image:url('images/332211.png');background-size:100% 100%;;background-repeat:no-repeat;"></div>
 				</div>
 			</div>

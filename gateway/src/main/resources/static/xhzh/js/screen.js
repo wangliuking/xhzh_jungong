@@ -9,10 +9,10 @@ require.config({
         echarts : 'lib/echarts'
     }
 });
-var alarmbs=true;
-var alarmji=true;
+
 var appElement = document.querySelector('[ng-controller=screen]');
 var structure;
+var responseData;
 xh.load = function() {
     var app = angular.module("app", []);
     app.controller("screen", function($scope, $http) {
@@ -32,6 +32,42 @@ xh.load = function() {
             }
         });
         //判断是否登录end
+
+        $scope.sendUrl = function(params){
+            console.log(params);
+            $http.get("../../connect/selectRTUById?id="+params.name).
+            success(function(response){
+                $scope.rtuData = response;
+                $scope.rtuScore = params.value;
+                var spdList = [];
+                var etcrList = [];
+                var temp = params.data.detail;
+                var detailArr = temp.replace(/\s*/g,"").replace("[","").replace("]","").split(",");
+                console.log(detailArr)
+                for(var i=0;i<detailArr.length;i++){
+                    var arrFirst = detailArr[i].split(":");
+                    var arrSecond = arrFirst[0].split("_");
+                    if(arrSecond[0] == "spd"){
+                        spdList.push({"number":parseInt(arrSecond[2]),"value":arrFirst[1]});
+                    }else if(arrSecond[0] == "rst"){
+                        etcrList.push({"number":parseInt(arrSecond[2]),"value":arrFirst[1]});
+                    }
+                }
+                console.log(spdList);
+                console.log(etcrList);
+                $scope.spdList = spdList.sort(function(a,b){
+                    return a.number-b.number})
+                $scope.etcrList = etcrList.sort(function(a,b){
+                    return a.number-b.number})
+                if(params.seriesName == "健康度分析值"){
+                    $scope.healthOrRisk = "健康度";
+                }else{
+                    $scope.healthOrRisk = "风险度";
+                }
+                $('#detail').modal('show');
+            });
+        }
+
         xh.initTotal();
         //setInterval(xh.initTotal, 30000);
 
@@ -46,14 +82,10 @@ xh.initTotal = function(){
         dataType : "json",
         async : false,
         success : function(response) {
-            var rtuList = response.rtuList;
             var siteNum = response.siteNum;
             var rtuNum = response.rtuNum;
             var deviceTotalNum = response.deviceTotalNum;
             var rtuWarningNum = response.rtuWarningNum;
-            var siteWarningTop5 = response.siteWarningTop5;
-            var siteDeviceOffTop5 = response.siteDeviceOffTop5;
-            var siteOff = response.siteOff;
             var data = response.num;
 
             $("#siteNum").html(siteNum);
@@ -61,12 +93,22 @@ xh.initTotal = function(){
             $("#deviceNum").html(deviceTotalNum);
             $("#rtuOffNum").html(rtuWarningNum);
 
-            xh.deviceWarningTop5(siteWarningTop5);
-            xh.deviceOffTop5(siteDeviceOffTop5);
             xh.call(data);
             xh.waterstatus(1,0);
             xh.waterstatus(2,0);
             xh.waterstatus(3,0);
+
+            $.ajax({
+                url : '../../data/healthTop5',
+                type : 'GET',
+                dataType : "json",
+                async : false,
+                success : function(response) {
+                    responseData = response;
+                    xh.deviceWarningTop5(response);
+                    xh.deviceOffTop5(response);
+                }
+            });
 
             $.ajax({
                 url : '../../connect/selectAllSite?start=&limit=&structure='+structure,
@@ -286,6 +328,8 @@ function totalMapEl(param){
 }
 
 xh.deviceWarningTop5=function(data){
+    var $scope = angular.element(appElement).scope();
+    console.log(data);
 
     // 设置容器宽高
     var height=document.documentElement.clientHeight;
@@ -305,12 +349,20 @@ xh.deviceWarningTop5=function(data){
 
     require([ 'echarts', 'echarts/chart/pie' ], function(ec) {
         chart = ec.init(document.getElementById('deviceWarning-top5'));
-        var leglend=[]
-        if(data.length > 0){
-            for(var i=0;i<data.length;i++){
-                leglend.push(data[i].name);
+        var values = [];
+        if(data.list1.length > 0){
+            for(var i=0;i<data.list1.length;i++){
+                values.push({value:data.list1[i].score,name:data.list1[i].rtu_id,detail:data.list1[i].detail});
             }
         }
+        if(data.list2.length > 0){
+            for(var i=data.list2.length-1;i>=0;i--){
+                values.push({value:data.list2[i].score,name:data.list2[i].rtu_id,detail:data.list2[i].detail});
+            }
+        }
+
+        console.log("values");
+        console.log(values);
 
         var option = {
             tooltip : {
@@ -318,58 +370,36 @@ xh.deviceWarningTop5=function(data){
                 padding: 10,
                 backgroundColor: 'rgba(9, 131, 195, 0.83)',
                 position: function(a){
-                    console.log(a);
+                    //console.log(a);
                     return [a[0]*0.5,a[1]*0.5];
                 },
-                /*formatter: function (a) {
-                    console.log(a);
-                    var tempUnit = a.seriesIndex == 0?"mV":"A/m²";
-                    return a.data[0] + '</br>' + a.seriesName + ':' + a.data[1] + tempUnit;
-                }*/
-                formatter: "{a} <br/>{b} : {c} ({d}%)",
+                formatter: "{a} <br/>{b} : {c}",
                 textStyle: {
                     color: "#fff",
                     fontSize: 14,
                     fontWeight: "bold"
                 }
             },
-            legend: {
-                x: 'center',
-                y: height*0.05,
-                itemWidth: 20,
-                itemHeight: 20,
-                textStyle: {
-                    color: "#fff",
-                    fontSize: 14,
-                    fontWeight: "bold"
-                },
-                data:leglend
-            },
-            calculable : true,
+            calculable : false,
             series : [
                 {
-                    name:'异常数量',
+                    name:'健康度分析值',
                     type:'pie',
-                    radius : '55%',
-                    center: ['50%', '60%'],
-                    data:data,
-                    itemStyle: {
-                        normal: {
-                            label: {
-                                textStyle: {
-                                    color: "#fff",
-                                    fontSize: 14,
-                                    fontWeight: "bold"
-                                }
-                            }
-                        }
-                    }
+                    radius : [30, 110],
+                    center : ['50%', '50%'],
+                    roseType : 'area',
+                    data: values
                 }
             ]
         };
-        if(data.length > 0){
+
+        if(data.list1.length > 0 && data.list2.length > 0){
             chart.setOption(option);
         }
+
+        chart.on('click', function (params) {
+            $scope.sendUrl(params);
+        });
 
     });
     /*window.onresize = function() {
@@ -379,6 +409,7 @@ xh.deviceWarningTop5=function(data){
 
 }
 xh.deviceOffTop5=function(data){
+    var $scope = angular.element(appElement).scope();
     //data = [{name:"管线1",value:100},{name:"管线2",value:150},{name:"管线3",value:180}]
     // 设置容器宽高
     var height=document.documentElement.clientHeight;
@@ -398,12 +429,18 @@ xh.deviceOffTop5=function(data){
 
     require([ 'echarts', 'echarts/chart/pie' ], function(ec) {
         chart = ec.init(document.getElementById('deviceOff-top5'));
-        var leglend=[]
-        if(data.length > 0){
-            for(var i=0;i<data.length;i++){
-                leglend.push(data[i].name);
+        var values = [];
+        if(data.l1.length > 0){
+            for(var i=0;i<data.l1.length;i++){
+                values.push({value:data.l1[i].score,name:data.l1[i].rtu_id,detail:data.l1[i].detail});
             }
         }
+        if(data.l2.length > 0){
+            for(var i=data.l2.length-1;i>=0;i--){
+                values.push({value:data.l2[i].score,name:data.l2[i].rtu_id,detail:data.l2[i].detail});
+            }
+        }
+
         var option = {
             tooltip : {
                 trigger: 'item',
@@ -413,50 +450,33 @@ xh.deviceOffTop5=function(data){
                     console.log(a);
                     return [a[0]*0.5,a[1]*0.5];
                 },
-                formatter: "{a} <br/>{b} : {c} ({d}%)",
+                formatter: "{a} <br/>{b} : {c}",
                 textStyle: {
                     color: "#fff",
                     fontSize: 14,
                     fontWeight: "bold"
                 }
             },
-            legend: {
-                x: 'center',
-                y: height*0.05,
-                itemWidth: 20,
-                itemHeight: 20,
-                textStyle: {
-                    color: "#fff",
-                    fontSize: 14,
-                    fontWeight: "bold"
-                },
-                data:leglend
-            },
-            calculable : true,
+            calculable : false,
             series : [
                 {
-                    name:'离线数量',
+                    name:'风险度分析值',
                     type:'pie',
-                    radius : '55%',
-                    center: ['50%', '60%'],
-                    data:data,
-                    itemStyle: {
-                        normal: {
-                            label: {
-                                textStyle: {
-                                    color: "#fff",
-                                    fontSize: 14,
-                                    fontWeight: "bold"
-                                }
-                            }
-                        }
-                    }
+                    radius : [30, 110],
+                    center : ['50%', '50%'],
+                    roseType : 'area',
+                    data: values
                 }
             ]
         };
-        if(data.length > 0){
+
+        if(data.list1.length > 0 && data.list2.length > 0){
             chart.setOption(option);
         }
+
+        chart.on('click', function (params) {
+            $scope.sendUrl(params);
+        });
 
     });
     /*window.onresize = function() {

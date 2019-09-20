@@ -99,6 +99,12 @@ zuul:
       custom-sensitive-headers: true
       path: /total/**
       serviceId: service-total
+    service-data:
+      #zuul转发请求时会丢失authorization的信息
+      sensitive-headers:
+      custom-sensitive-headers: true
+      path: /data/**
+      serviceId: service-data
 eureka:
   instance:
     prefer-ip-address: true #以IP地址注册到服务中心
