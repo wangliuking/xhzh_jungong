@@ -583,9 +583,12 @@ public class TotalController {
         System.out.println("strList : ++++++++++++"+strList);
         param.put("strList",strList);
         int siteNum = totalService.selectSiteTotal(param);
+        int siteOnNum = totalService.selectSiteOnTotal(param);
         int rtuNum = totalService.selectRTUTotal(param);
+        int rtuOnNum = rtuNum - totalService.selectRTUOffTotal(param);
         int spdNum = totalService.selectSPDTotal(param);
         int etcrNum = totalService.selectETCRTotal(param);
+        int etcrBottomNum = totalService.selectETCRRelaynoTotal(param);
         int lightningNum = totalService.selectLightningTotal(param);
         int staticNum = totalService.selectStaticTotal(param);
         int rswsNum = totalService.selectRswsTotal(param);
@@ -595,19 +598,33 @@ public class TotalController {
         int catNum = totalService.selectCatTotal(param);
         int deviceTotalNum = spdNum+etcrNum+lightningNum+staticNum+rswsNum+svtNum+hcNum+strayNum+catNum;
 
+        List<Map<String,Object>> siteWarningNum = totalService.selectSiteWarning(param);
         List<Map<String,Object>> rtuWarningNum = totalService.selectRTUWarning(param);
+        List<Map<String,Object>> etcrWarningNum = totalService.selectETCRWarning(param);
         List<Map<String,Object>> siteWarningTop5 = totalService.selectSiteWarningTotal(param);
         List<Map<String,Object>> siteDeviceOffTop5 = totalService.selectSiteDeviceOffTotal(param);
-        List<Map<String,Object>> siteOff = totalService.selectSiteOffTotal(param);
+        List<Map<String,Object>> siteOffLine = totalService.selectSiteOffLineTotal(param);
+        int alarmNowNum = totalService.selectAlarmNowNum(param);
         Map<String,Object> resultMap = new HashMap<>();
         resultMap.put("siteWarningTop5",siteWarningTop5);
         resultMap.put("siteDeviceOffTop5",siteDeviceOffTop5);
-        resultMap.put("siteOff",siteOff);
+        resultMap.put("siteOffLine",siteOffLine.size());
         resultMap.put("siteNum",siteNum);
+        resultMap.put("siteOnNum",siteOnNum);
         resultMap.put("rtuNum",rtuNum);
+        resultMap.put("rtuOnNum",rtuOnNum);
+        resultMap.put("rtuOffLine",totalService.selectRTUOffLine(param));
+        resultMap.put("spdNum",spdNum);
+        resultMap.put("spdOff",totalService.selectSPDOffLine(param));
+        resultMap.put("etcrNum",etcrNum);
+        resultMap.put("etcrOff",totalService.selectETCROffLine(param).size());
         resultMap.put("deviceTotalNum",deviceTotalNum);
+        resultMap.put("siteWarningNum",siteWarningNum.size());
         resultMap.put("rtuWarningNum",rtuWarningNum.size());
+        resultMap.put("etcrWarningNum",etcrWarningNum.size());
         resultMap.put("num",ScheduledService.getNowDataList());
+        resultMap.put("alarmNowNum",alarmNowNum);
+        resultMap.put("etcrBottomNum",etcrBottomNum);
         return resultMap;
     }
 

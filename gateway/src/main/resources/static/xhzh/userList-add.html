@@ -21,13 +21,14 @@
 						<div class="col-md-4">
 							<div class="form-group col-md-12">
 								<label>用户名</label>&nbsp;<span class="text-danger">[*]</span> <input
-									type="text" value="" class="form-control" name="username">
+									type="text" ng-blur="selectCountUserByUsername('addUserName')" class="form-control" name="username" id="addUserName">
+								<span ng-style="{'color':mesColor}">{{message}}</span>
 							</div>
 						</div>
 						<div class="col-md-4">
 							<div class="form-group col-md-12">
 								<label>密码</label>&nbsp;<span class="text-danger">[*]</span> <input
-									type="text" value="" class="form-control" name="password">
+									type="password" class="form-control" name="password">
 							</div>
 						</div>
 					</div>
@@ -36,13 +37,13 @@
 						<div class="col-md-4">
 							<div class="form-group col-md-12">
 								<label>邮箱</label>&nbsp;<span class="text-danger">[*]</span> <input
-									type="text" value="" class="form-control" name="email">
+									type="text" class="form-control" name="email">
 							</div>
 						</div>
 						<div class="col-md-4">
 							<div class="form-group col-md-12">
 								<label>用户组</label>&nbsp;<span class="text-danger">[*]</span>
-								<select class="selectForArea" id="groupId" style="width:100%;" name="groupId">
+								<select class="selectForArea" style="width:100%;" name="groupId">
 									<option ng-repeat="x in groups" ng-value="x.id">{{x.name}}</option>
 								</select>
 							</div>
@@ -50,7 +51,7 @@
 						<div class="col-md-4">
 							<div class="form-group col-md-12">
 								<label>角色</label>&nbsp;<span class="text-danger">[*]</span>
-								<select class="selectForArea" id="role" style="width:100%;" name="roleId">
+								<select class="selectForArea" style="width:100%;" name="roleId">
 									<option ng-repeat="x in roles" ng-value="x.id">{{x.name}}</option>
 								</select>
 							</div>
@@ -64,7 +65,7 @@
 					data-dismiss="modal">
 					<i class="fa fa-remove"></i>&nbsp;关闭
 				</button>
-				<button type="button" ng-disabled="form.$invalid"
+				<button ng-show="btnStatus" type="button" ng-disabled="form.$invalid"
 					class="btn btn-success btn-sm" id="add_btn">
 					<i class="fa fa-plus"></i>&nbsp;新增
 				</button>

@@ -3,6 +3,7 @@ package run.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import run.EncryptUtil;
+import run.bean.User;
 import run.redis.RedisTest;
 import run.service.LoginService;
 import javax.servlet.http.HttpServletRequest;
@@ -18,10 +19,10 @@ public class LoginController {
     @Autowired
     FeignForMQ feignForMQ;
 
-    @RequestMapping("/login")
-    public Map<String,Object> login(HttpServletRequest req) {
-        String username = req.getParameter("username");
-        String password = req.getParameter("password");
+    @RequestMapping(value = "/loginWeb",method = RequestMethod.POST)
+    public Map<String,Object> login(@RequestBody User user, HttpServletRequest req) {
+        String username = user.getUsername();
+        String password = user.getPassword();
         Map<String,Object> param = new HashMap<>();
         System.out.println("username为： "+username+"====="+"password为： "+ EncryptUtil.encrypt(password));
         param.put("username",username);

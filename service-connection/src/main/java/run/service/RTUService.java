@@ -18,12 +18,28 @@ public class RTUService {
         return rtuMapper.selectAllRTU(param);
     }
 
+    public List<Map<String,Object>> selectAllRTUDrawBySiteId(Map<String,Object> param){
+        return rtuMapper.selectAllRTUDrawBySiteId(param);
+    }
+
+    public Map<String,Object> selectSiteInfo(Map<String,Object> param){
+        return rtuMapper.selectSiteInfo(param);
+    }
+
     public int selectDeviceWarningCount(int rtu_id){
         return rtuMapper.selectDeviceWarningCount(rtu_id);
     }
 
     public Map<String,Object> selectRTUById(int id){
         return rtuMapper.selectRTUById(id);
+    }
+
+    public Map<String,Object> selectSPDStatusById(int id){
+        return rtuMapper.selectSPDStatusById(id);
+    }
+
+    public Map<String,Object> selectETCRStatusById(int id){
+        return rtuMapper.selectETCRStatusById(id);
     }
 
     public int selectRTUCountBySiteId(int id){

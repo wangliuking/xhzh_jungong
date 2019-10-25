@@ -15,6 +15,15 @@ var structure;
 var responseData;
 xh.load = function() {
     var app = angular.module("app", []);
+
+    app.filter('changeValueTwo', function() { //可以注入依赖
+        return function(text) {
+            var i = parseFloat(text);
+            var a = Math.round(i*100);
+            return a/100;
+        };
+    });
+
     app.controller("screen", function($scope, $http) {
         //判断是否登录start
         $.ajax({
@@ -33,39 +42,70 @@ xh.load = function() {
         });
         //判断是否登录end
 
-        $scope.sendUrl = function(params){
-            console.log(params);
-            $http.get("../../connect/selectRTUById?id="+params.name).
+        $scope.showSite = function(id){
+            $http.get("../../connect/selectAllRTUDraw?site_id="+id).
             success(function(response){
-                $scope.rtuData = response;
-                $scope.rtuScore = params.value;
-                var spdList = [];
-                var etcrList = [];
-                var temp = params.data.detail;
-                var detailArr = temp.replace(/\s*/g,"").replace("[","").replace("]","").split(",");
-                console.log(detailArr)
-                for(var i=0;i<detailArr.length;i++){
-                    var arrFirst = detailArr[i].split(":");
-                    var arrSecond = arrFirst[0].split("_");
-                    if(arrSecond[0] == "spd"){
-                        spdList.push({"number":parseInt(arrSecond[2]),"value":arrFirst[1]});
-                    }else if(arrSecond[0] == "rst"){
-                        etcrList.push({"number":parseInt(arrSecond[2]),"value":arrFirst[1]});
-                    }
-                }
-                console.log(spdList);
-                console.log(etcrList);
-                $scope.spdList = spdList.sort(function(a,b){
-                    return a.number-b.number})
-                $scope.etcrList = etcrList.sort(function(a,b){
-                    return a.number-b.number})
-                if(params.seriesName == "健康度分析值"){
-                    $scope.healthOrRisk = "健康度";
-                }else{
-                    $scope.healthOrRisk = "风险度";
-                }
+                console.log("^^^^^^^^^^^^^^^^^^")
+                console.log(response);
+                $scope.siteInfo = response.siteInfo;
+                $scope.rtuList = response.items;
+                $scope.siteDetail = true;
+                $scope.rtuDetail = false;
                 $('#detail').modal('show');
             });
+        }
+
+        $scope.sendUrl = function(id){
+            console.log(id);
+            $http.get("../../connect/rtuDraw?id="+id).
+            success(function(response){
+                console.log("************************")
+                console.log(response)
+                console.log("************************")
+                $scope.rtuData = response.rtuInfo;
+                $scope.rtuHealth = response.health.score;
+                $scope.rtuRisk = response.risk.score;
+                $scope.spdStatus = response.spdStatus;
+                $scope.etcrStatus = response.etcrStatus;
+                var tempHealth = response.health.detail;
+                var resHealth = $scope.analysisMethod(tempHealth);
+                var spdHealthList = resHealth.spd;
+                var etcrHealthList = resHealth.etcr;
+                var tempRisk = response.risk.detail;
+                var resRisk = $scope.analysisMethod(tempRisk);
+                var spdRiskList = resRisk.spd;
+                var etcrRiskList = resRisk.etcr;
+
+                $scope.spdHealthList = spdHealthList.sort(function(a,b){
+                    return a.number-b.number})
+                $scope.spdRiskList = spdRiskList.sort(function(a,b){
+                    return a.number-b.number})
+                $scope.etcrHealthList = etcrHealthList.sort(function(a,b){
+                    return a.number-b.number})
+                $scope.etcrRiskList = etcrRiskList.sort(function(a,b){
+                    return a.number-b.number})
+
+                $scope.siteDetail = false;
+                $scope.rtuDetail = true;
+                $('#detail').modal('show');
+            });
+        }
+
+        $scope.analysisMethod = function(temp){
+            var spdList = [];
+            var etcrList = [];
+            var detailArr = temp.replace(/\s*/g,"").replace("[","").replace("]","").split(",");
+            console.log(detailArr)
+            for(var i=0;i<detailArr.length;i++){
+                var arrFirst = detailArr[i].split(":");
+                var arrSecond = arrFirst[0].split("_");
+                if(arrSecond[0] == "spd"){
+                    spdList.push({"number":parseInt(arrSecond[2]),"value":arrFirst[1]});
+                }else if(arrSecond[0] == "rst"){
+                    etcrList.push({"number":parseInt(arrSecond[3]),"value":arrFirst[1]});
+                }
+            }
+            return {"spd":spdList,"etcr":etcrList};
         }
 
         xh.initTotal();
@@ -83,20 +123,46 @@ xh.initTotal = function(){
         async : false,
         success : function(response) {
             var siteNum = response.siteNum;
+            var siteOffLine = response.siteOffLine;
+            var siteOnNum = response.siteOnNum;
             var rtuNum = response.rtuNum;
+            var rtuOnNum = response.rtuOnNum;
+            var rtuOffLine = response.rtuOffLine;
+            var spdNum = response.spdNum;
+            var spdOff = response.spdOff;
+            var etcrNum = response.etcrNum;
+            var etcrOff = response.etcrOff;
             var deviceTotalNum = response.deviceTotalNum;
+            var siteWarningNum =response.siteWarningNum;
             var rtuWarningNum = response.rtuWarningNum;
+            var etcrWarningNum = response.etcrWarningNum;
             var data = response.num;
+            var alarmNowNum = response.alarmNowNum;
+            var etcrBottomNum = response.etcrBottomNum;
 
-            $("#siteNum").html(siteNum);
-            $("#rtuNum").html(rtuNum);
-            $("#deviceNum").html(deviceTotalNum);
-            $("#rtuOffNum").html(rtuWarningNum);
+            $("#siteNum").html(siteOnNum+" / "+siteNum);
+            $("#rtuNum").html(rtuOnNum+" / "+rtuNum);
+            $("#deviceNum").html(deviceTotalNum+" / "+deviceTotalNum);
+
+            $("#siteOffNum").html(siteOffLine+" - "+(siteNum-siteOffLine-siteWarningNum));
+            $("#rtuOffNum").html(rtuOffLine+" - "+(rtuNum-rtuOffLine-rtuWarningNum));
+            $("#spdOffNum").html(spdOff+" - "+(spdNum-spdOff));
+            $("#etcrOffNum").html(etcrOff+" - "+(etcrNum-etcrOff-etcrWarningNum));
+
+            $("#siteWarningNum").html(siteWarningNum+" - "+(siteNum-siteWarningNum));
+            $("#rtuWarningNum").html(rtuWarningNum+" - "+(rtuNum-rtuWarningNum));
+            $("#spdWarningNum").html(spdOff+" - "+(spdNum-spdOff));
+            $("#etcrWarningNum").html(etcrWarningNum+" - "+(etcrNum-etcrWarningNum));
+
+            $("#alarmNum").html(alarmNowNum);
+
+            $("#spdNum").html(spdNum);
+            $("#etcrNum").html(etcrNum);
+            $("#otherNum").html(0);
+            $("#etcrBottomNum").html(etcrBottomNum);
+            $("#strayBottomNum").html(0);
 
             xh.call(data);
-            xh.waterstatus(1,0);
-            xh.waterstatus(2,0);
-            xh.waterstatus(3,0);
 
             $.ajax({
                 url : '../../data/healthTop5',
@@ -105,6 +171,7 @@ xh.initTotal = function(){
                 async : false,
                 success : function(response) {
                     responseData = response;
+                    xh.systemSource(response);
                     xh.deviceWarningTop5(response);
                     xh.deviceOffTop5(response);
                 }
@@ -123,16 +190,17 @@ xh.initTotal = function(){
     });
 }
 
-var provinceJson = {"北京市":11,"天津市":12,"河北省":13,"山西省":14,"内蒙古自治区":15,"辽宁省":21,"吉林省":22,"黑龙江省":23,"上海市":31,"江苏省":32,"浙江省":33,"安徽省":34,"福建省":35,"江西省":36,"山东省":37,"河南省":41,"湖北省":42,"湖南省":43,"广东省":44,"广西壮族自治区":45,"海南省":46,"重庆市":50,"四川省":51,"贵州省":52,"云南省":53,"西藏自治区":54,"陕西省":61,"甘肃省":62,"青海省":63,"宁夏回族自治区":64,"新疆维吾尔自治区":65,"台湾省":71,"香港特别行政区":81,"澳门特别行政区":82};
+var provinceJson = {"北京市":11,"天津市":12,"河北省":13,"山西省":14,"内蒙古自治区":15,"辽宁省":21,"吉林省":22,"黑龙江省":23,"上海市":31,"江苏省":32,"浙江省":33,"安徽省":34,"福建省":35,"江西省":36,"山东省":37,"河南省":41,"湖北省":42,"湖南省":43,"广东省":44,"广西壮族自治区":45,"海南省":46,"重庆市":50,"四川省":51,"贵州省":52,"云南省":53,"西藏自治区":54,"陕西省":61,"甘肃省":62,"青海省":63,"宁夏回族自治区":64,"新疆维吾尔自治区":65,"台湾省":71,"香港特别行政区":81,"澳门特别行政区":82,"南海诸岛":460300};
 var cityPosition = {"北京市":["116.405289","39.904987"],"天津市":["117.190186","39.125595"],"河北省":["114.502464","38.045475"],"山西省":["112.549248","37.857014"],"内蒙古自治区":["111.751990","40.841490"],"辽宁省":["123.429092","41.796768"],"吉林省":["125.324501","43.886841"],"黑龙江省":["126.642464","45.756966"],"上海市":["121.472641","31.231707"],"江苏省":["118.76741","32.041546"],"浙江省":["120.15358","30.287458"],"安徽省":["117.283043","31.861191"],"福建省":["119.306236","26.075302"],"江西省":["115.892151","28.676493"],"山东省":["117.000923","36.675808"],"河南省":["113.665413","34.757977"],"湖北省":["114.298569","30.584354"],"湖南省":["112.982277","28.19409"],"广东省":["113.28064","23.125177"],"广西壮族自治区":["108.320007","22.82402"],"海南省":["110.199890","20.044220"],"重庆市":["106.504959","29.533155"],"四川省":["104.065735","30.659462"],"贵州省":["106.713478","26.578342"],"云南省":["102.71225","25.040609"],"西藏自治区":["91.11450","29.644150"],"陕西省":["108.948021","34.263161"],"甘肃省":["103.834170","36.061380"],"青海省":["101.777820","36.617290"],"宁夏回族自治区":["106.232480","38.486440"],"新疆维吾尔自治区":["87.616880","43.826630"],"台湾省":["121.50","25.03"],"香港特别行政区":["114.165460","22.275340"],"澳门特别行政区":["113.549130","22.198750"]};
 xh.map=function(data){
-    console.log(data);
+    var $scope = angular.element(appElement).scope();
+    //console.log(data);
     // 设置容器宽高
     var height=document.documentElement.clientHeight;
     var width=document.documentElement.clientWidth;
     var resizeBarContainer = function() {
-        $("#map").width((width/12)*7);
-        $("#map").height(height-200);
+        $("#map").width(847);
+        $("#map").height(773);
     };
     resizeBarContainer();
 
@@ -159,7 +227,7 @@ xh.map=function(data){
             tooltip : {
                 trigger: 'item',
                 formatter: function (params, ticket, callback) {
-                    console.log(params)
+                    //console.log(params)
                     if(params.value != ""){
                         return params.name+'<br />'+"站点数量:"+params.value;
                     }else{
@@ -204,7 +272,7 @@ xh.map=function(data){
                     },
                     data:[],
                     markPoint:{
-                        clickable: false,
+                        clickable: true,
                         symbol:'pin',//'image://images/标注_l.png',
                         symbolSize : function (v){
                             return 3
@@ -257,7 +325,7 @@ xh.map=function(data){
         var cityInit = [];
         for(var i in data){
             option.series[0].geoCoord[data[i].site_name] = [data[i].site_lng, data[i].site_lat];
-            option.series[0].markPoint.data.push({name:data[i].site_name});
+            option.series[0].markPoint.data.push({name:data[i].site_name,site_id:data[i].site_id});
             provinceInit.push(data[i].site_province);
             cityInit.push(data[i].site_city);
         }
@@ -305,6 +373,17 @@ xh.map=function(data){
             chart.setOption(option);
         });
 
+        //点击事件,根据点击某个省份计算出这个省份的数据
+        chart.on('click', function (params) {
+            if(params.data.x){
+                console.log("*****************************")
+                console.log(params);
+                console.log("*****************************")
+                $scope.showSite(params.data.site_id);
+            }
+
+        });
+
     });
 
 }
@@ -326,7 +405,30 @@ function totalMapEl(param){
     }, {});
     return temp;
 }
+xh.systemSource=function(data){
+    var $scope = angular.element(appElement).scope();
+    console.log(data);
 
+    // 设置容器宽高
+    var height=document.documentElement.clientHeight;
+    var width=document.documentElement.clientWidth;
+    var resizeBarContainer = function() {
+        $("#siteSource").width(447);
+        $("#siteSource").height(282);
+        $("#rtuSource").width(447);
+        $("#rtuSource").height(282);
+        $("#deviceSource").width(447);
+        $("#deviceSource").height(242);
+        $("#off").width(447);
+        $("#off").height(352);
+        $("#warning").width(447);
+        $("#warning").height(352);
+        $("#alarm").width(447);
+        $("#alarm").height(162);
+    };
+    resizeBarContainer();
+
+}
 xh.deviceWarningTop5=function(data){
     var $scope = angular.element(appElement).scope();
     console.log(data);
@@ -335,8 +437,8 @@ xh.deviceWarningTop5=function(data){
     var height=document.documentElement.clientHeight;
     var width=document.documentElement.clientWidth;
     var resizeBarContainer = function() {
-        $("#deviceWarning-top5").width((width/12)*2);
-        $("#deviceWarning-top5").height((height-240)/2);
+        $("#deviceWarning-top5").width(447);
+        $("#deviceWarning-top5").height(420);
     };
     resizeBarContainer();
 
@@ -365,6 +467,15 @@ xh.deviceWarningTop5=function(data){
         console.log(values);
 
         var option = {
+            title : {
+                text : 'RTU健康度TOP5',
+                x : 20,
+                y : 30,
+                textStyle : {
+                    color : '#fff',
+                    fontSize : 16
+                }
+            },
             tooltip : {
                 trigger: 'item',
                 padding: 10,
@@ -385,7 +496,7 @@ xh.deviceWarningTop5=function(data){
                 {
                     name:'健康度分析值',
                     type:'pie',
-                    radius : [30, 110],
+                    radius : [30, 100],
                     center : ['50%', '50%'],
                     roseType : 'area',
                     data: values
@@ -398,7 +509,7 @@ xh.deviceWarningTop5=function(data){
         }
 
         chart.on('click', function (params) {
-            $scope.sendUrl(params);
+            $scope.sendUrl(params.name);
         });
 
     });
@@ -415,8 +526,8 @@ xh.deviceOffTop5=function(data){
     var height=document.documentElement.clientHeight;
     var width=document.documentElement.clientWidth;
     var resizeBarContainer = function() {
-        $("#deviceOff-top5").width((width/12)*2);
-        $("#deviceOff-top5").height((height-200)/2);
+        $("#deviceOff-top5").width(447);
+        $("#deviceOff-top5").height(420);
     };
     resizeBarContainer();
 
@@ -442,6 +553,15 @@ xh.deviceOffTop5=function(data){
         }
 
         var option = {
+            title : {
+                text : 'RTU风险度TOP5',
+                x : 20,
+                y : 30,
+                textStyle : {
+                    color : '#fff',
+                    fontSize : 16
+                }
+            },
             tooltip : {
                 trigger: 'item',
                 padding: 10,
@@ -462,10 +582,20 @@ xh.deviceOffTop5=function(data){
                 {
                     name:'风险度分析值',
                     type:'pie',
-                    radius : [30, 110],
+                    radius : [30, 100],
                     center : ['50%', '50%'],
                     roseType : 'area',
-                    data: values
+                    data: values,
+                    labelLine: {
+                        normal: {
+                            lineStyle: {
+                                color: 'rgba(255, 255, 255, 0.3)'
+                            },
+                            smooth: 0.2,
+                            length: (width/12)*2 / 20,
+                            length2: (width/12)*2 / 40,
+                        }
+                    }
                 }
             ]
         };
@@ -475,7 +605,7 @@ xh.deviceOffTop5=function(data){
         }
 
         chart.on('click', function (params) {
-            $scope.sendUrl(params);
+            $scope.sendUrl(params.name);
         });
 
     });
@@ -490,8 +620,8 @@ xh.call = function(data) {
     var height=document.documentElement.clientHeight;
     var width=document.documentElement.clientWidth;
     var resizeBarContainer = function() {
-        $("#call-bar").width((width/12)*2.6);
-        $("#call-bar").height(height-320);
+        $("#call-bar").width(445);
+        $("#call-bar").height(782);
     };
     resizeBarContainer();
 
@@ -612,7 +742,7 @@ xh.call = function(data) {
         resizeBarContainer();
     };
 };
-xh.waterstatus=function(id,totals){
+/*xh.waterstatus=function(id,totals){
     var vaterColor="blue";
     var tColor;
     if(id==1){
@@ -636,7 +766,7 @@ xh.waterstatus=function(id,totals){
         wave : true,
         animation : true
     });
-}
+}*/
 xh.getOneDay=function() {
     var   today=new Date();
     var   yesterday_milliseconds=today.getTime();    //-1000*60*60*24

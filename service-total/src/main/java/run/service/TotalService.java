@@ -24,6 +24,18 @@ public class TotalService {
         return totalMapper.selectRTUWarning(param);
     }
 
+    public List<Map<String,Object>> selectSiteWarning(Map<String,Object> param){
+        return totalMapper.selectSiteWarning(param);
+    }
+
+    public List<Map<String,Object>> selectETCRWarning(Map<String,Object> param){
+        return totalMapper.selectETCRWarning(param);
+    }
+
+    public int selectAlarmNowNum(Map<String,Object> param){
+        return totalMapper.selectAlarmNowNum(param);
+    }
+
     public int selectRTUWarningCountSchedule(Map<String,Object> param){
         return totalMapper.selectRTUWarningCountSchedule(param);
     }
@@ -264,6 +276,10 @@ public class TotalService {
         return totalMapper.selectETCRTotal(param);
     }
 
+    public int selectETCRRelaynoTotal(Map<String,Object> param){
+        return totalMapper.selectETCRRelaynoTotal(param);
+    }
+
     public int selectLightningTotal(Map<String,Object> param){
         return totalMapper.selectLightningTotal(param);
     }
@@ -300,8 +316,16 @@ public class TotalService {
         return totalMapper.selectSiteTotal(param);
     }
 
+    public int selectSiteOnTotal(Map<String,Object> param){
+        return totalMapper.selectSiteOnTotal(param);
+    }
+
     public int selectRTUTotal(Map<String,Object> param){
         return totalMapper.selectRTUTotal(param);
+    }
+
+    public int selectRTUOffTotal(Map<String,Object> param){
+        return totalMapper.selectRTUOffTotal(param);
     }
 
     public List<Map<String,Object>> selectSiteWarningTotal(Map<String,Object> param){
@@ -312,8 +336,20 @@ public class TotalService {
         return totalMapper.selectSiteDeviceOffTotal(param);
     }
 
-    public List<Map<String,Object>> selectSiteOffTotal(Map<String,Object> param){
-        return totalMapper.selectSiteOffTotal(param);
+    public List<Map<String,Object>> selectSiteOffLineTotal(Map<String,Object> param){
+        return totalMapper.selectSiteOffLineTotal(param);
+    }
+
+    public int selectRTUOffLine(Map<String,Object> param){
+        return totalMapper.selectRTUOffLine(param);
+    }
+
+    public int selectSPDOffLine(Map<String,Object> param){
+        return totalMapper.selectSPDOffLine(param);
+    }
+
+    public List<Map<String,Object>> selectETCROffLine(Map<String,Object> param){
+        return totalMapper.selectETCROffLine(param);
     }
 
     public List<Integer> selectRTUStatusBySiteId(Map<String,Object> param){

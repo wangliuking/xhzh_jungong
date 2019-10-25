@@ -12,6 +12,8 @@ import java.util.Map;
 
 @Repository
 public interface UserMapper {
+    @Select("select count(*) from xhzh.user where username = #{username}")
+    int selectCountUserByUsername(String username);
 
     @Select("select * from xhzh.user where username = #{username}")
     User selectUserByUsername(String username);
@@ -44,7 +46,7 @@ public interface UserMapper {
     @Insert("insert into xhzh.user(username,name,password,email,groupId,roleId) values(#{username},#{name},#{password},#{email},#{groupId},#{roleId})")
     int insertUser(User user);
 
-    @Update("update xhzh.user set name=#{name},email=#{email},groupId=#{groupId},roleId=#{roleId} where username=#{username}")
+    @Update("update xhzh.user set username=#{username},password=#{password},name=#{name},email=#{email},groupId=#{groupId},roleId=#{roleId} where username=#{activationKey}")
     int updateUser(User user);
 
     @Delete("delete from xhzh.user where username=#{username}")

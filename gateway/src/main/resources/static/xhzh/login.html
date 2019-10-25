@@ -225,23 +225,25 @@
         <div class="dowebok">
     <div class="logo" style="float: right;"><img src="images/盾形防护图标.png" width="240" height="240" /></div>
     <div style="float: left;line-height: 35px;padding: 30px 0 0 30px;">
-        <div class="form-item">
-            <input id="username" type="text" placeholder="用户名">
-            <p class="tipUser">用户名不合法</p>
-        </div>
-        <div class="form-item">
-            <input id="password" type="password" placeholder="密码">
-            <p class="tipPass">密码不合法</p>
-        </div>
-        <div class="form-item">
-            <input id="auth" type="text" placeholder="验证码">
-            <canvas id="canvas" width="110px" height="46px" style="float: right;"></canvas>
-            <p class="tipAuth">验证码不正确</p>
-        </div>
-        <div class="form-item">
-            <!--<button type="button" class="btn btn-info">信息</button>-->
-            <button id="submit" type="button" ng-click="login()">登 录</button>
-        </div>
+        <form id="loginForm">
+            <div class="form-item">
+                <input id="username" type="text" placeholder="用户名" name="username">
+                <p class="tipUser">用户名不合法</p>
+            </div>
+            <div class="form-item">
+                <input id="password" type="password" placeholder="密码" name="password">
+                <p class="tipPass">密码不合法</p>
+            </div>
+            <div class="form-item">
+                <input id="auth" type="text" placeholder="验证码">
+                <canvas id="canvas" width="110px" height="46px" style="float: right;"></canvas>
+                <p class="tipAuth">验证码不正确</p>
+            </div>
+            <div class="form-item">
+                <!--<button type="button" class="btn btn-info">信息</button>-->
+                <button id="submit" type="button" ng-click="login()">登 录</button>
+            </div>
+        </form>
         <!--<div class="reg-bar">
             <a class="reg" href="javascript:">立即注册</a>
             <a class="forget" href="javascript:">忘记密码</a>
@@ -361,21 +363,19 @@
                 return false;
             }
 
-            /*$http.get("../../login?username="+username+"&password="+password).
-            success(function(data){
-                console.log(data);
-                if(data == "登录成功"){
-                    window.location.href = "main.html";
-                }else{
-                    alert("账户或密码错误！");
-                }
-            });*/
-
+            var fields = $("#loginForm").serializeArray();
+            var f = {};//声明一个对象
+            $.each(fields,function(index,field){
+                f[field.name] = field.value;//通过变量，将属性值，属性一起放到对象中
+            });
+            var str = JSON.stringify(f);
             $.ajax({
-                url : "../../login?username="+username+"&password="+password,
-                type : 'GET',
+                url : '../../loginWeb',
+                contentType : "application/json;charset=utf-8",
+                type : 'POST',
                 dataType : "json",
-                async : false,
+                async : true,
+                data : str,
                 success : function(data) {
                     console.log(data);
                     if(data.result == "登录成功"){

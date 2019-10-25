@@ -127,11 +127,12 @@
                                     <td>{{x.roleName}}</td>
                                     <td>{{x.email}}</td>
                                     <td ng-if="x.activated == 1"><span style="color: green;">正常</span></td>
-                                    <td>
-                                        <a href="#" ng-click="showEdit($index)">修改</a>
+                                    <td ng-if="x.username != 'admin'">
+                                        <a href="#" ng-click="showEdit(x.username)">修改</a>
                                         |
                                         <a href="#" ng-click="delBs(x.username)">删除</a>
                                     </td>
+                                    <td ng-if="x.username == 'admin'"></td>
                                 </tr>
                                 </tbody>
                             </table>

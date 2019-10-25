@@ -17,6 +17,10 @@ public class UserService {
         return userMapper.selectUserByUsername(username);
     }
 
+    public int selectCountUserByUsername(String username){
+        return userMapper.selectCountUserByUsername(username);
+    }
+
     public List<Map<String,Object>> selectUserList(Map<String,Object> param){
         return userMapper.selectUserList(param);
     }

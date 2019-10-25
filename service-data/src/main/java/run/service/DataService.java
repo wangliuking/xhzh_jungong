@@ -12,6 +12,14 @@ public class DataService {
     @Autowired
     DataMapper dataMapper;
 
+    public Map<String,Object> rtuHealth(String rtu_id){
+        return dataMapper.rtuHealth(rtu_id);
+    }
+
+    public Map<String,Object> rtuRisk(String rtu_id){
+        return dataMapper.rtuRisk(rtu_id);
+    }
+
     public List<Map<String,Object>> healthTop5A(){
         return dataMapper.healthTop5A();
     }

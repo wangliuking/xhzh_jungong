@@ -5,7 +5,7 @@
 	<meta name="keywords" content="keyword1,keyword2,keyword3">
 	<meta name="description" content="this is my page">
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="viewport" content="initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,Chrome=1" />
 	<meta http-equiv="X-UA-Compatible" content="IE=9" />
 	<meta http-equiv="Pragma" content="no-cache">
@@ -23,14 +23,18 @@
         }
 	</script>
 	<style type="text/css">
-		html,body {
+		* {
 			margin: 0;
 			padding: 0;
+		}
+		html,body {
 			background: url('images/background1.jpg') no-repeat;
-			height:100%;
-			width:100%;
-			overflow: hidden;
 			background-size:100% 100%;
+			-moz-background-size:100% 100%;
+			min-width:1920px;
+			min-height:1080px;
+			position: relative;
+
 		}
 
 		#goToIndex {
@@ -85,10 +89,6 @@
 			font-weight: 700;
 			font-size: 1.1em
 		}
-		#testLogo{
-			width:170%;
-			height:65%;
-		}
 		/* nav ul li{
           background:#ccc;
           margin:0px;
@@ -100,6 +100,7 @@
 		}
 		.myModal-footer{
 			border:none;
+			height: 10px;
 		}
 		.form-group label {
 			font-weight: normal;
@@ -115,8 +116,11 @@
 			font-size: 0.8vw;
 			color: white;
 		}
-		.myBody{
+		.rtuBody{
 			font-size: 16px;
+		}
+		.row{
+			max-width: 1920px;
 		}
 	</style>
 </head>
@@ -134,72 +138,267 @@
 	<div class="modal-dialog modal-lg">
 		<div class="modal-content myContent">
 			<div class="modal-header myModal-header">
-				<!--<h5 class="modal-title" id="myModalLabel">RTU-{{rtuData.rtu_id}}</h5>-->
 			</div>
-			<div class="modal-body myBody">
-				<div class="row">
+			<div ng-if="siteDetail" class="modal-body siteBody" style="font-size:16px;">
+				<div class="row" style="margin-bottom: 20px;margin-top: 6px;">
 					<div class="col-md-3">
-						<div class="form-group col-md-12">
-							基本信息
+						<div class="form-group col-md-12" style="margin-bottom: 0;padding-bottom: 0;">
+							<img style="margin-bottom: 6px;" src="images/基本.png" width="30" height="30"/>
+							<span style="font-size: 18px;">站点情况</span>
 						</div>
 					</div>
 				</div>
 				<div class="row">
 					<div class="col-md-3">
 						<div class="form-group col-md-12">
-							<label>RTU-ID</label>&nbsp;<span class="text-info">[*]</span> <input
-								type="text" ng-value="rtuData.rtu_id" class="form-control" style="border: none;background: none;color: yellow;" readonly="readonly">
+							<label>站点名称</label>&nbsp;<span class="text-info">[*]</span> <input
+								type="text" ng-value="siteInfo.site_name" class="form-control" style="font-size:16px;border: none;background: none;color: yellow;" readonly="readonly">
 						</div>
 					</div>
 					<div class="col-md-3">
 						<div class="form-group col-md-12">
-							<label>RTU-IP</label>&nbsp;<span class="text-info">[*]</span> <input
-								type="text" ng-value="rtuData.rtu_ip" class="form-control" style="border: none;background: none;color: yellow;" readonly="readonly">
+							<label>所属行业</label>&nbsp;<span class="text-info">[*]</span> <input
+								type="text" ng-value="siteInfo.site_industry" class="form-control" style="font-size:16px;border: none;background: none;color: yellow;" readonly="readonly">
 						</div>
 					</div>
 					<div class="col-md-3">
 						<div class="form-group col-md-12">
-							<label>RTU端口</label>&nbsp;<span class="text-info">[*]</span> <input
-								type="text" ng-value="rtuData.rtu_port" class="form-control" style="border: none;background: none;color: yellow;" readonly="readonly">
+							<label>组织机构</label>&nbsp;<span class="text-info">[*]</span> <input
+								type="text" ng-value="siteInfo.name" class="form-control" style="font-size:16px;border: none;background: none;color: yellow;" readonly="readonly">
 						</div>
 					</div>
 					<div class="col-md-3">
 						<div class="form-group col-md-12">
-							<label>综合{{healthOrRisk}}得分</label>&nbsp;<span class="text-info">[*]</span> <input
-								type="text" ng-value="rtuScore" class="form-control" style="border: none;background: none;color: yellow;" readonly="readonly">
+							<label>下挂RTU数量</label>&nbsp;<span class="text-info">[*]</span> <input
+								type="text" ng-value="rtuList.length" class="form-control" style="font-size:16px;border: none;background: none;color: yellow;" readonly="readonly">
 						</div>
 					</div>
 
 				</div>
-				<hr style=" border-top:1px dashed #28beff;" ng-show="spdList.length>0"/>
+				<hr style=" border-top:1px dashed #28beff;margin-bottom: 10px;" />
+				<div class="row" style="margin-bottom: 20px;margin-top: 6px;">
+					<div class="col-md-3">
+						<div class="form-group col-md-12" style="margin-bottom: 0;padding-bottom: 0;">
+							<img style="margin-bottom: 6px;" src="images/基本.png" width="30" height="30"/>
+							<span style="font-size: 18px;">RTU列表</span>
+						</div>
+					</div>
+				</div>
+
+				<div ng-show="rtuList.length > 0">
+					<table style="width: 100%;">
+						<thead>
+						<tr style="text-align: center;">
+							<th style="text-align: center;">序号</th>
+							<th style="text-align: center;">RTU-ID</th>
+							<th style="text-align: center;">当前状态</th>
+							<th style="text-align: center;">健康度</th>
+							<th style="text-align: center;">风险度</th>
+							<th style="text-align: center;">操作</th>
+						</tr>
+						</thead>
+						<tbody style="font-size: 16px;">
+						<tr style="text-align: center;" ng-repeat="x in rtuList">
+							<td style="width: 16%;">{{$index+1}}</td>
+							<td>{{x.rtu_id}}</td>
+							<td style="color: #1fcf1c;" ng-if="x.rtu_state == 0">正常</td>
+							<td style="color: red;" ng-if="x.rtu_state == 1">离线</td>
+							<td style="color: yellow;" ng-if="x.rtu_state == 2">异常</td>
+
+							<td style="color: red;" ng-if="x.health < 0.1">差 ( {{x.health | changeValueTwo}} ) </td>
+							<td style="color: yellow;" ng-if="x.health >= 0.1 && x.health <= 0.4">中 ( {{x.health | changeValueTwo}} ) </td>
+							<td style="color: #c7cf21;" ng-if="x.health > 0.4 && x.health <= 0.7">良 ( {{x.health | changeValueTwo}} ) </td>
+							<td style="color: #1fcf1c;" ng-if="x.health > 0.7">优 ( {{x.health | changeValueTwo}} ) </td>
+
+							<td style="color: red;" ng-if="x.risk < 0.1">差 ( {{x.risk | changeValueTwo}} ) </td>
+							<td style="color: yellow;" ng-if="x.risk >= 0.1 && x.risk <= 0.4">中 ( {{x.risk | changeValueTwo}} ) </td>
+							<td style="color: #c7cf21;" ng-if="x.risk > 0.4 && x.risk <= 0.7">良 ( {{x.risk | changeValueTwo}} ) </td>
+							<td style="color: #1fcf1c;" ng-if="x.risk > 0.7">优 ( {{x.risk | changeValueTwo}} ) </td>
+
+							<td><a href="#" ng-click="sendUrl(x.rtu_id)" style="color: yellow;">详细信息</a></td>
+						</tr>
+						</tbody>
+
+					</table>
+				</div>
+			</div>
+			<div ng-if="rtuDetail" class="modal-body rtuBody" style="font-size:16px;">
+				<div class="row" style="margin-bottom: 20px;margin-top: 6px;">
+					<div class="col-md-3">
+						<div class="form-group col-md-12" style="margin-bottom: 0;padding-bottom: 0;">
+							<img style="margin-bottom: 6px;" src="images/基本.png" width="30" height="30"/>
+							<span style="font-size: 18px;">基本情况</span>
+						</div>
+					</div>
+				</div>
 				<div class="row">
-					<div class="col-md-3" ng-show="spdList.length>0">
+					<div class="col-md-2">
+						<div class="form-group col-md-12">
+							<label>站点编号</label>&nbsp;<span class="text-info">[*]</span>
+                            <div style="font-size:16px;border: none;background: none;color: yellow;">
+                                <a href="#" ng-click="showSite(rtuData.site_id)" style="color: yellow;">{{rtuData.site_id}}</a>
+                            </div>
+						</div>
+					</div>
+					<div class="col-md-2">
+						<div class="form-group col-md-12">
+							<label>RTU-ID</label>&nbsp;<span class="text-info">[*]</span>
+                            <div style="font-size:16px;border: none;background: none;color: yellow;">
+                                {{rtuData.rtu_id}}
+                            </div>
+						</div>
+					</div>
+					<div class="col-md-2">
+						<div class="form-group col-md-12">
+							<label>当前状态</label>&nbsp;<span class="text-info">[*]</span>
+                            <div ng-if="rtuData.rtu_state == 0" style="font-size:16px;border: none;background: none;color: #1fcf1c;">
+                                在线
+                            </div>
+                            <div ng-if="rtuData.rtu_state == 1" style="font-size:16px;border: none;background: none;color: red;">
+                                离线
+                            </div>
+                            <div ng-if="rtuData.rtu_state == 2" style="font-size:16px;border: none;background: none;color: yellow;">
+                                异常
+                            </div>
+
+                        </div>
+					</div>
+					<div class="col-md-2">
+						<div class="form-group col-md-12">
+							<label>健康情况</label>&nbsp;<span class="text-info">[*]</span>
+
+							<div style="color: red;" ng-if="rtuHealth < 0.1">差 ( {{rtuHealth | changeValueTwo}} ) </div>
+							<div style="color: yellow;" ng-if="rtuHealth >= 0.1 && rtuHealth <= 0.4">中 ( {{rtuHealth | changeValueTwo}} ) </div>
+							<div style="color: #c7cf21;" ng-if="rtuHealth > 0.4 && rtuHealth <= 0.7">良 ( {{rtuHealth | changeValueTwo}} ) </div>
+							<div style="color: #1fcf1c;" ng-if="rtuHealth > 0.7">优 ( {{rtuHealth | changeValueTwo}} ) </div>
+
+						</div>
+					</div>
+					<div class="col-md-2">
+						<div class="form-group col-md-12">
+							<label>风险情况</label>&nbsp;<span class="text-info">[*]</span>
+                            <div style="color: red;" ng-if="rtuRisk < 0.1">差 ( {{rtuRisk | changeValueTwo}} ) </div>
+                            <div style="color: yellow;" ng-if="rtuRisk >= 0.1 && rtuRisk <= 0.4">中 ( {{rtuRisk | changeValueTwo}} ) </div>
+                            <div style="color: #c7cf21;" ng-if="rtuRisk > 0.4 && rtuRisk <= 0.7">良 ( {{rtuRisk | changeValueTwo}} ) </div>
+                            <div style="color: #1fcf1c;" ng-if="rtuRisk > 0.7">优 ( {{rtuRisk | changeValueTwo}} ) </div>
+						</div>
+					</div>
+
+				</div>
+				<hr style=" border-top:1px dashed #28beff;margin-bottom: 10px;" />
+				<div class="row" style="margin-bottom: 20px;">
+					<div class="col-md-3">
+						<div class="form-group col-md-12" style="margin-bottom: 0;padding-bottom: 0;">
+							<img style="margin-bottom: 6px;" src="images/设备.png" width="30" height="30"/>
+							<span style="font-size: 18px;">设备情况</span>
+						</div>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-md-6">
+						<div style="margin-left:20px;width:auto;background-color: transparent;border: none;box-shadow: none;"
+							 class="panel-card card-filter">
+							<div class="card-img" style="height:100%;border:none;">
+								<img src="images/SPD.png" width="60" height="60"/>
+							</div>
+							<div class="card-info" style="height:100%;line-height:60px;border:none;margin-top: 5px;">
+								<div style="font-size: 20px;">
+									SPD状态：
+									<span ng-if="spdStatus == 0" style="color: #1fcf1c;background-color: transparent;border: none;box-shadow: none;">正常</span>
+									<span ng-if="spdStatus == 1" style="color: red;background-color: transparent;border: none;box-shadow: none;">离线</span>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div style="width:auto;background-color: transparent;border: none;box-shadow: none;"
+							 class="panel-card card-filter">
+							<div class="card-img" style="height:100%;border:none;">
+								<img src="images/接地电阻检测.png" width="60" height="60"/>
+							</div>
+							<div class="card-info" style="height:100%;line-height:60px;border:none;margin-top: 5px;">
+								<div style="font-size: 20px;">
+									接地电阻状态：
+									<span ng-if="etcrStatus == 0" style="color: #1fcf1c;background-color: transparent;border: none;box-shadow: none;">正常</span>
+									<span ng-if="etcrStatus == 1" style="color: red;background-color: transparent;border: none;box-shadow: none;">离线</span>
+									<span ng-if="etcrStatus == 2" style="color: yellow;background-color: transparent;border: none;box-shadow: none;">异常</span>
+								</div>
+							</div>
+						</div>
+					</div>
+
+				</div>
+
+				<hr style=" border-top:1px dashed #28beff;margin-bottom: 10px;" />
+				<div class="row" style="margin-bottom: 20px;">
+					<div class="col-md-3">
+						<div class="form-group col-md-12" style="margin-bottom: 0;padding-bottom: 0;">
+							<img style="margin-bottom: 6px;" src="images/业务.png" width="30" height="30"/>
+							<span style="font-size: 18px;">业务情况</span>
+						</div>
+					</div>
+				</div>
+				<div class="row" ng-show="spdHealthList.length>0 || spdRiskList.length>0">
+					<div class="col-md-3">
 						<div class="form-group col-md-12">
 							SPD
 						</div>
 					</div>
 				</div>
-				<div class="row">
-					<div class="col-md-3" ng-repeat="x in spdList">
+
+				<div class="row" ng-show="spdHealthList.length>0">
+					<div class="col-md-3" ng-repeat="x in spdHealthList">
 						<div class="form-group col-md-12">
-							<label>第{{x.number}}路{{healthOrRisk}}</label>&nbsp;<span class="text-info">[*]</span> <input
-								type="text" ng-value="x.value" class="form-control" style="border: none;background: none;color: yellow;" readonly="readonly">
+							<label>第{{x.number}}路健康度</label>&nbsp;<span class="text-info">[*]</span>
+							<div ng-if="x.value < 0.1" style="color: red;">差 ( {{x.value | changeValueTwo}} ) </div>
+							<div ng-if="x.value >= 0.1 && x.value <= 0.4" style="color: yellow;">中 ( {{x.value | changeValueTwo}} ) </div>
+							<div ng-if="x.value > 0.4 && x.value <= 0.7" style="color: #c7cf21;">良 ( {{x.value | changeValueTwo}} ) </div>
+							<div ng-if="x.value > 0.7" style="color: #1fcf1c;">优 ( {{x.value | changeValueTwo}} ) </div>
 						</div>
 					</div>
 				</div>
-				<hr style=" border-top:1px dashed #28beff;" ng-show="etcrList.length>0"/>
-				<div class="row" ng-show="etcrList.length>0">
+
+				<div class="row" ng-show="spdRiskList.length>0">
+					<div class="col-md-3" ng-repeat="x in spdRiskList">
+						<div class="form-group col-md-12">
+							<label>第{{x.number}}路风险度</label>&nbsp;<span class="text-info">[*]</span>
+							<div ng-if="x.value < 0.1" style="color: red;">差 ( {{x.value | changeValueTwo}} ) </div>
+							<div ng-if="x.value >= 0.1 && x.value <= 0.4" style="color: yellow;">中 ( {{x.value | changeValueTwo}} ) </div>
+							<div ng-if="x.value > 0.4 && x.value <= 0.7" style="color: #c7cf21;">良 ( {{x.value | changeValueTwo}} ) </div>
+							<div ng-if="x.value > 0.7" style="color: #1fcf1c;">优 ( {{x.value | changeValueTwo}} ) </div>
+						</div>
+					</div>
+				</div>
+
+				<div class="row" ng-show="etcrHealthList.length>0 || etcrRiskList.length>0">
 					<div class="col-md-3">
 						<div class="form-group col-md-12">
 							接地电阻
 						</div>
 					</div>
 				</div>
-				<div class="row">
-					<div class="col-md-3" ng-repeat="x in etcrList">
+
+				<div class="row" ng-show="etcrHealthList.length>0">
+					<div class="col-md-3" ng-repeat="x in etcrHealthList">
 						<div class="form-group col-md-12">
-							<label>监测点{{x.number}}{{healthOrRisk}}</label>&nbsp;<span class="text-info">[*]</span> <input
-								type="text" ng-value="x.value" class="form-control" style="border: none;background: none;color: yellow;" readonly="readonly">
+							<label>监测点{{x.number}}健康度</label>&nbsp;<span class="text-info">[*]</span>
+							<div ng-if="x.value < 0.1" style="color: red;">差 ( {{x.value | changeValueTwo}} ) </div>
+							<div ng-if="x.value >= 0.1 && x.value <= 0.4" style="color: yellow;">中 ( {{x.value | changeValueTwo}} ) </div>
+							<div ng-if="x.value > 0.4 && x.value <= 0.7" style="color: #c7cf21;">良 ( {{x.value | changeValueTwo}} ) </div>
+							<div ng-if="x.value > 0.7" style="color: #1fcf1c;">优 ( {{x.value | changeValueTwo}} ) </div>
+						</div>
+					</div>
+				</div>
+
+				<div class="row" ng-show="etcrRiskList.length>0">
+					<div class="col-md-3" ng-repeat="x in etcrRiskList">
+						<div class="form-group col-md-12">
+							<label>监测点{{x.number}}风险度</label>&nbsp;<span class="text-info">[*]</span>
+							<div ng-if="x.value < 0.1" style="color: red;">差 ( {{x.value | changeValueTwo}} ) </div>
+							<div ng-if="x.value >= 0.1 && x.value <= 0.4" style="color: yellow;">中 ( {{x.value | changeValueTwo}} ) </div>
+							<div ng-if="x.value > 0.4 && x.value <= 0.7" style="color: #c7cf21;">良 ( {{x.value | changeValueTwo}} ) </div>
+							<div ng-if="x.value > 0.7" style="color: #1fcf1c;">优 ( {{x.value | changeValueTwo}} ) </div>
 						</div>
 					</div>
 				</div>
@@ -210,198 +409,345 @@
 	</div>
 	<!-- /.modal -->
 </div>
-<!--<div class="modal fade" id="detail" tabindex="-1" role="dialog" style="background: none;"
-	 aria-hidden="true">
-	<div class="modal-dialog modal-lg">
-		<div class="modal-content">
-			<div class="modal-header myModal-header">
-				<h5 class="modal-title myModal-header-font" id="myModalLabel">RTU健康度详细情况</h5>
-			</div>
-			<div class="modal-body myModal-body">
-				<div class="row">
-					<div class="col-md-3">
-						<div class="form-group col-md-12">
-							SPD
-						</div>
-					</div>
-				</div>
-				<div class="row">
-					<div class="col-md-3">
-						<div class="form-group col-md-12">
-							<label>健康度得分</label>&nbsp;<span class="text-info">[*]</span> <input
-								type="text" ng-value="" class="form-control" name="site_name" style="border: 1px solid blue;">
-						</div>
-					</div>
-				</div>
-				<div class="row">
-					<div class="col-md-3">
-						<div class="form-group col-md-12">
-							接地电阻
-						</div>
-					</div>
-				</div>
-				<div class="row">
-					<div class="col-md-3">
-						<div class="form-group col-md-12">
-							<label>监测点1</label>&nbsp;<span class="text-danger">[*]</span> <input
-								type="text" ng-value="" class="form-control" name="site_name" style="border: 1px solid blue;">
-						</div>
-					</div>
-					<div class="col-md-3">
-						<div class="form-group col-md-12">
-							<label>监测点2</label>&nbsp;<span class="text-danger">[*]</span> <input
-								type="text" ng-value="" class="form-control" name="site_name" style="border: 1px solid blue;">
-						</div>
-					</div>
-					<div class="col-md-3">
-						<div class="form-group col-md-12">
-							<label>监测点3</label>&nbsp;<span class="text-danger">[*]</span> <input
-								type="text" ng-value="" class="form-control" name="site_name" style="border: 1px solid blue;">
-						</div>
-					</div>
-					<div class="col-md-3">
-						<div class="form-group col-md-12">
-							<label>监测点4</label>&nbsp;<span class="text-danger">[*]</span> <input
-								type="text" ng-value="" class="form-control" name="site_name" style="border: 1px solid blue;">
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="modal-footer myModal-footer"></div>
-		</div>
-		&lt;!&ndash; /.modal-content &ndash;&gt;
-	</div>
-	&lt;!&ndash; /.modal &ndash;&gt;
-</div>-->
-
-<!--<a href="main.html" target="_top"><div id="goToIndex">进入首页</div></a>-->
-<div id="logoTemp" style="position: fixed;top:1%;left:45%;z-index:1000;">
-	<a href="main.html" target="_top">
-		<img id="testLogo" src="images/XH_LOGO_w.png" width="100%" height="100%">
-	</a>
-</div>
+<a href="main.html" target="_top" style="position: absolute;top:16px;left:850px;z-index: 1000;">
+	<img id="testLogo" src="images/XH_LOGO_w.png" width="221" height="64">
+</a>
 <!-- 中间内容体 -->
+<div style="padding-top:6px;position: absolute;top:1%;left: 9%;z-index: 1000;color: #fff;">
+	<p style="margin: 0;padding: 0;"><span id="showTime1" style="font-size: 16px;"></span></p>
+	<p style="margin: 0;padding: 0 0 0 130px;"><span id="showTime2" style="font-size: 16px"></span></p>
+</div>
 <div class="lgData-content animate-panel">
-	<div class="row">
+	<div class="row" style="min-height: 58px;">
 		<div class="col-md-3" >
 			<div id="headerTemp1" style="width:auto;margin-left: 36%;margin-top:3%;background-color: transparent;border: none;box-shadow: none;float: left;"
 				 class="panel-card card-filter">
-				<div class="card-img" style="height:100%;border:none;">
-					<img src="images/1.png" width="100%" height="100%"/>
-				</div>
-				<div class="card-info" style="height:100%;border:none;margin-top: 5px;">
-					<label style="font-size: 1vw;">站点总数</label>
-					<div id="siteNum" style="float: right;border:none;font-size: 1vw;color: yellow;"></div>
-				</div>
-			</div>
-		</div>
-		<div class="col-md-3">
-			<div id="headerTemp2" style="width:auto;margin-left: 26%;margin-top:6%;background-color: transparent;border: none;box-shadow: none;float: left;"
-				 class="panel-card card-filter">
-				<div class="card-img" style="height:100%;border:none;">
-					<img src="images/ico-11.png" width="100%" height="100%"/>
-				</div>
-				<div class="card-info" style="height:100%;border:none;margin-top: 5px;">
-					<label style="font-size: 1vw;">RTU总数</label>
-					<div id="rtuNum" style="float: right;border:none;font-size: 1vw;color: yellow;"></div>
-				</div>
-			</div>
-		</div>
-		<div class="col-md-3">
-			<div id="headerTemp3" style="width:auto;margin-left: 38%;margin-top:6%;background-color: transparent;border: none;box-shadow: none;float: left;"
-				 class="panel-card card-filter">
-				<div class="card-img" style="height:100%;border:none;">
-					<img src="images/ico-01.png" width="100%" height="100%"/>
-				</div>
-				<div class="card-info" style="height:100%;border:none;margin-top: 5px;">
-					<label style="font-size: 1vw;">设备总数</label>
-					<div id="deviceNum" style="float: right;border:none;font-size: 1vw;color: yellow;"></div>
-				</div>
-			</div>
-		</div>
-		<div class="col-md-3">
-			<div id="headerTemp4" style="width:auto;margin-left: 10%;margin-top:3%;background-color: transparent;border: none;box-shadow: none;float: left;"
-				 class="panel-card card-filter">
-				<div class="card-img" style="height:100%;border:none;">
-					<img src="images/ico-10.png" width="100%" height="100%"/>
-				</div>
-				<div class="card-info" style="height:100%;border:none;margin-top: 5px;">
-					<label style="font-size: 1vw;">RTU异常总数</label>
-					<div id="rtuOffNum" style="float: right;border:none;font-size: 1vw;color: yellow;"></div>
-				</div>
 			</div>
 		</div>
 	</div>
 	<div class="row">
-		<div class="col-md-2 lg-left" style="padding-left:50px;">
-			<div class="row">
-				<div class="col-md-12 lg-box" style="margin-top:5px;">
-					<p>RTU健康度TOP5</p>
-					<div id="deviceWarning-top5" style="background-image:url('images/332211.png');background-size:100% 100%;;background-repeat:no-repeat;"></div>
-				</div>
+		<div class="col-md-3">
+			<div style="width:70%;height:70px;margin-top:3px;margin-left:27%;text-align:center;line-height:90px;background-image:url('images/header-left.png');background-size:100% 100%;;background-repeat:no-repeat;">
+				<span style="font-size: 28px;" id="leftTopDesc">系统资源</span>
 			</div>
-			<div class="row">
-				<div class="col-md-12 lg-box" style="margin-top:5px">
-					<p>RTU风险度TOP5</p>
-					<div id="deviceOff-top5" style="background-image:url('images/332211.png');background-size:100% 100%;;background-repeat:no-repeat;"></div>
+		</div>
+		<div class="col-md-3"></div>
+		<div class="col-md-3"></div>
+		<div class="col-md-3">
+			<div style="width:70%;height:70px;margin-top:3px;margin-left:7%;text-align:center;line-height:90px;background-image:url('images/header-left.png');background-size:100% 100%;;background-repeat:no-repeat;">
+				<span style="font-size: 28px;" id="rightTopDesc">数据分析</span>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div style="width: 480px;margin-left:70px;float: left;display: block;" id="systemSource">
+			<div id="siteSource" style="min-width:447px;min-height:282px;background-image:url('images/332211.png');background-size:100% 100%;background-repeat:no-repeat;">
+				<div style="padding-top: 20px;padding-left: 20px;">
+					<img style="margin-bottom: 6px;" src="images/点位.png" width="30" height="30"/>
+					<span style="font-size: 16px;font-weight: bold;">点位数量</span>
+				</div>
+
+				<div style="margin-top:10px;margin-left:20px;width:auto;background-color: transparent;border: none;box-shadow: none;"
+					 class="panel-card card-filter">
+					<div class="card-img" style="height:100%;border:none;">
+						<img src="images/1.png" width="100%" height="100%"/>
+					</div>
+					<div class="card-info" style="height:100%;line-height:60px;border:none;margin-top: 5px;">
+						<div style="font-size: 20px;">站点数量</div>
+						<div style="font-size: 20px;">( 在用数</div>
+						<div id="siteNum" style="border:none;font-size: 20px;color: yellow;"></div>
+						<div style="font-size: 20px;">总数 )</div>
+					</div>
+				</div>
+
+
+				<div style="margin-top:10px;margin-left:20px;width:auto;background-color: transparent;border: none;box-shadow: none;"
+					 class="panel-card card-filter">
+					<div class="card-img" style="height:100%;border:none;">
+						<img src="images/ico-11.png" width="100%" height="100%"/>
+					</div>
+					<div class="card-info" style="height:100%;line-height:60px;border:none;margin-top: 5px;">
+						<div style="font-size: 20px;">RTU数量</div>
+						<div style="font-size: 20px;">( 在用数</div>
+						<div id="rtuNum" style="border:none;font-size: 20px;color: yellow;"></div>
+						<div style="font-size: 20px;">总数 )</div>
+					</div>
+				</div>
+
+				<div style="margin-top:10px;margin-left:20px;width:auto;background-color: transparent;border: none;box-shadow: none;"
+					 class="panel-card card-filter">
+					<div class="card-img" style="height:100%;border:none;">
+						<img src="images/ico-01.png" width="100%" height="100%"/>
+					</div>
+					<div class="card-info" style="height:100%;line-height:60px;border:none;margin-top: 5px;">
+						<div style="font-size: 20px;">设备数量</div>
+						<div style="font-size: 20px;">( 在用数</div>
+						<div id="deviceNum" style="border:none;font-size: 20px;color: yellow;"></div>
+						<div style="font-size: 20px;">总数 )</div>
+					</div>
+				</div>
+
+			</div>
+			<div id="rtuSource" style="min-width:447px;min-height:282px;background-image:url('images/332211.png');background-size:100% 100%;background-repeat:no-repeat;">
+				<div style="padding-top: 20px;padding-left: 20px;">
+					<img style="margin-bottom: 6px;" src="images/类型.png" width="30" height="30"/>
+					<span style="font-size: 16px;font-weight: bold;">设备类型</span>
+				</div>
+
+				<div style="margin-top:10px;margin-left:20px;width:auto;background-color: transparent;border: none;box-shadow: none;"
+					 class="panel-card card-filter">
+					<div class="card-img" style="height:100%;border:none;">
+						<img src="images/SPD.png" width="100%" height="100%"/>
+					</div>
+					<div class="card-info" style="height:100%;line-height:60px;border:none;margin-top: 5px;">
+						<div style="font-size: 20px;">SPD配置总数</div>
+						<div id="spdNum" style="border:none;font-size: 20px;color: yellow;"></div>
+					</div>
+				</div>
+
+
+				<div style="margin-top:10px;margin-left:20px;width:auto;background-color: transparent;border: none;box-shadow: none;"
+					 class="panel-card card-filter">
+					<div class="card-img" style="height:100%;border:none;">
+						<img src="images/接地电阻检测.png" width="100%" height="100%"/>
+					</div>
+					<div class="card-info" style="height:100%;line-height:60px;border:none;margin-top: 5px;">
+						<div style="font-size: 20px;">接地电阻配置总数</div>
+						<div id="etcrNum" style="border:none;font-size: 20px;color: yellow;"></div>
+					</div>
+				</div>
+
+				<div style="margin-top:10px;margin-left:20px;width:auto;background-color: transparent;border: none;box-shadow: none;"
+					 class="panel-card card-filter">
+					<div class="card-img" style="height:100%;border:none;padding-top:10px;">
+						<img src="images/其他设备.png" width="100%" height="90%"/>
+					</div>
+					<div class="card-info" style="height:100%;line-height:60px;border:none;margin-top: 5px;">
+						<div style="font-size: 20px;">其他设备配置总数</div>
+						<div id="otherNum" style="border:none;font-size: 20px;color: yellow;"></div>
+					</div>
+				</div>
+
+			</div>
+			<div id="deviceSource" style="min-width:447px;min-height:212px;background-image:url('images/332211.png');background-size:100% 100%;background-repeat:no-repeat;">
+				<div style="padding-top: 20px;padding-left: 20px;">
+					<img style="margin-bottom: 6px;" src="images/创意平台_继电器.png" width="30" height="30"/>
+					<span style="font-size: 16px;font-weight: bold;">前端继电器</span>
+				</div>
+
+				<div style="margin-top:10px;margin-left:20px;width:auto;background-color: transparent;border: none;box-shadow: none;"
+					 class="panel-card card-filter">
+					<div class="card-img" style="height:100%;border:none;">
+						<img src="images/接地电阻继电器.png" width="100%" height="100%"/>
+					</div>
+					<div class="card-info" style="height:100%;line-height:60px;border:none;margin-top: 5px;">
+						<div style="font-size: 20px;">接地电阻继电器总数</div>
+						<div id="etcrBottomNum" style="border:none;font-size: 20px;color: yellow;"></div>
+					</div>
+				</div>
+
+
+				<div style="margin-top:10px;margin-left:20px;width:auto;background-color: transparent;border: none;box-shadow: none;"
+					 class="panel-card card-filter">
+					<div class="card-img" style="height:100%;border:none;padding-top: 6px;">
+						<img src="images/其他继电器.png" width="100%" height="96%"/>
+					</div>
+					<div class="card-info" style="height:100%;line-height:60px;border:none;margin-top: 5px;">
+						<div style="font-size: 20px;">其他继电器总数</div>
+						<div id="strayBottomNum" style="border:none;font-size: 20px;color: yellow;"></div>
+					</div>
+				</div>
+
+			</div>
+		</div>
+
+		<div style="width: 480px;margin-left:70px;float: left;display: none;" id="systemStatus">
+			<div id="off" style="min-width:447px;min-height:342px;background-image:url('images/332211.png');background-size:100% 100%;background-repeat:no-repeat;">
+				<div style="padding-top: 20px;padding-left: 20px;">
+					<img style="margin-bottom: 6px;" src="images/离线.png" width="30" height="30"/>
+					<span style="font-size: 16px;font-weight: bold;">离线情况</span>
+				</div>
+
+				<div style="margin-top:10px;margin-left:20px;width:auto;background-color: transparent;border: none;box-shadow: none;"
+					 class="panel-card card-filter">
+					<div class="card-img" style="height:100%;border:none;">
+						<img src="images/1.png" width="100%" height="100%"/>
+					</div>
+					<div class="card-info" style="height:100%;line-height:60px;border:none;margin-top: 5px;">
+						<div style="font-size: 20px;">站点</div>
+						<div style="font-size: 20px;">( 离线</div>
+						<div id="siteOffNum" style="border:none;font-size: 20px;color: yellow;"></div>
+						<div style="font-size: 20px;">正常 )</div>
+					</div>
+				</div>
+
+				<div style="margin-top:10px;margin-left:20px;width:auto;background-color: transparent;border: none;box-shadow: none;"
+					 class="panel-card card-filter">
+					<div class="card-img" style="height:100%;border:none;">
+						<img src="images/ico-11.png" width="100%" height="100%"/>
+					</div>
+					<div class="card-info" style="height:100%;line-height:60px;border:none;margin-top: 5px;">
+						<div style="font-size: 20px;">RTU</div>
+						<div style="font-size: 20px;">( 离线</div>
+						<div id="rtuOffNum" style="border:none;font-size: 20px;color: yellow;"></div>
+						<div style="font-size: 20px;">正常 )</div>
+					</div>
+				</div>
+
+				<div style="margin-top:10px;margin-left:20px;width:auto;background-color: transparent;border: none;box-shadow: none;"
+					 class="panel-card card-filter">
+					<div class="card-img" style="height:100%;border:none;">
+						<img src="images/SPD.png" width="100%" height="100%"/>
+					</div>
+					<div class="card-info" style="height:100%;line-height:60px;border:none;margin-top: 5px;">
+						<div style="font-size: 20px;">SPD</div>
+						<div style="font-size: 20px;">( 离线</div>
+						<div id="spdOffNum" style="border:none;font-size: 20px;color: yellow;"></div>
+						<div style="font-size: 20px;">正常 )</div>
+					</div>
+				</div>
+
+				<div style="margin-top:10px;margin-left:20px;width:auto;background-color: transparent;border: none;box-shadow: none;"
+					 class="panel-card card-filter">
+					<div class="card-img" style="height:100%;border:none;">
+						<img src="images/接地电阻检测.png" width="100%" height="100%"/>
+					</div>
+					<div class="card-info" style="height:100%;line-height:60px;border:none;margin-top: 5px;">
+						<div style="font-size: 20px;">接地电阻</div>
+						<div style="font-size: 20px;">( 离线</div>
+						<div id="etcrOffNum" style="border:none;font-size: 20px;color: yellow;"></div>
+						<div style="font-size: 20px;">正常 )</div>
+					</div>
+				</div>
+
+			</div>
+			<div id="warning" style="min-width:447px;min-height:342px;background-image:url('images/332211.png');background-size:100% 100%;background-repeat:no-repeat;">
+				<div style="padding-top: 20px;padding-left: 20px;">
+					<img style="margin-bottom: 6px;" src="images/异常.png" width="30" height="30"/>
+					<span style="font-size: 16px;font-weight: bold;">异常情况</span>
+				</div>
+
+				<div style="margin-top:10px;margin-left:20px;width:auto;background-color: transparent;border: none;box-shadow: none;"
+					 class="panel-card card-filter">
+					<div class="card-img" style="height:100%;border:none;">
+						<img src="images/1.png" width="100%" height="100%"/>
+					</div>
+					<div class="card-info" style="height:100%;line-height:60px;border:none;margin-top: 5px;">
+						<div style="font-size: 20px;">站点</div>
+						<div style="font-size: 20px;">( 异常</div>
+						<div id="siteWarningNum" style="border:none;font-size: 20px;color: yellow;"></div>
+						<div style="font-size: 20px;">正常 )</div>
+					</div>
+				</div>
+
+				<div style="margin-top:10px;margin-left:20px;width:auto;background-color: transparent;border: none;box-shadow: none;"
+					 class="panel-card card-filter">
+					<div class="card-img" style="height:100%;border:none;">
+						<img src="images/ico-11.png" width="100%" height="100%"/>
+					</div>
+					<div class="card-info" style="height:100%;line-height:60px;border:none;margin-top: 5px;">
+						<div style="font-size: 20px;">RTU</div>
+						<div style="font-size: 20px;">( 异常</div>
+						<div id="rtuWarningNum" style="border:none;font-size: 20px;color: yellow;"></div>
+						<div style="font-size: 20px;">正常 )</div>
+					</div>
+				</div>
+
+				<div style="margin-top:10px;margin-left:20px;width:auto;background-color: transparent;border: none;box-shadow: none;"
+					 class="panel-card card-filter">
+					<div class="card-img" style="height:100%;border:none;">
+						<img src="images/SPD.png" width="100%" height="100%"/>
+					</div>
+					<div class="card-info" style="height:100%;line-height:60px;border:none;margin-top: 5px;">
+						<div style="font-size: 20px;">SPD</div>
+						<div style="font-size: 20px;">( 异常</div>
+						<div id="spdWarningNum" style="border:none;font-size: 20px;color: yellow;"></div>
+						<div style="font-size: 20px;">正常 )</div>
+					</div>
+				</div>
+
+				<div style="margin-top:10px;margin-left:20px;width:auto;background-color: transparent;border: none;box-shadow: none;"
+					 class="panel-card card-filter">
+					<div class="card-img" style="height:100%;border:none;">
+						<img src="images/接地电阻检测.png" width="100%" height="100%"/>
+					</div>
+					<div class="card-info" style="height:100%;line-height:60px;border:none;margin-top: 5px;">
+						<div style="font-size: 20px;">接地电阻</div>
+						<div style="font-size: 20px;">( 异常</div>
+						<div id="etcrWarningNum" style="border:none;font-size: 20px;color: yellow;"></div>
+						<div style="font-size: 20px;">正常 )</div>
+					</div>
+				</div>
+
+			</div>
+			<div id="alarm" style="min-width:447px;min-height:82px;background-image:url('images/332211.png');background-size:100% 100%;background-repeat:no-repeat;">
+				<div style="padding-top: 20px;padding-left: 20px;">
+					<img style="margin-bottom: 6px;" src="images/告警.png" width="30" height="30"/>
+					<span style="font-size: 16px;font-weight: bold;">告警情况</span>
+				</div>
+
+				<div style="margin-top:10px;margin-left:20px;width:auto;background-color: transparent;border: none;box-shadow: none;"
+					 class="panel-card card-filter">
+					<div class="card-img" style="height:100%;border:none;">
+						<img src="images/告警数.png" width="100%" height="100%"/>
+					</div>
+					<div class="card-info" style="height:100%;line-height:60px;border:none;margin-top: 5px;">
+						<div style="font-size: 20px;">当前告警数</div>
+						<div id="alarmNum" style="border:none;font-size: 20px;color: yellow;"></div>
+						<div style="font-size: 20px;">条</div>
+					</div>
 				</div>
 			</div>
 		</div>
 		<!-- lg-left -->
-		<div class="col-md-7 lg-center">
+		<div style="width: 813px;float: left;">
 			<div class="row">
 				<div class="col-md-12">
-					<div id="map" style="margin-top: 50px;padding-left: 50px;"></div>
+					<div id="map"></div>
 				</div>
 			</div>
 		</div>
 		<!-- lg-center-->
-		<div class="col-md-3 lg-right">
-			<div class="row">
-				<div class="col-md-12 lg-box">
-					<p>今日设备上报数据实时统计</p>
-					<div id="call-bar" style="background-image:url('images/332211.png');background-size:100% 100%;;background-repeat:no-repeat;padding:0;"></div>
+		<div style="width: 488px;margin-left:0;float: left;">
+			<div class="row" style="display: none;" id="nowTotal">
+				<div class="col-md-12 lg-box" style="min-width:521px;min-height:865px;margin-top:5px;margin-left: 60px;">
+					<!--<p>今日设备上报数据实时统计</p>-->
+					<div id="call-bar" style="min-width:445px;min-height:782px;background-image:url('images/332211.png');background-size:100% 100%;;background-repeat:no-repeat;"></div>
 				</div>
 			</div>
-			<div>
+
+			<div style="display: block;" id="dataAnalysis">
 				<div class="row">
-					<div class="col-md-6 lg-box" style="height:150px;">
-						<p>应用接入</p>
-						<div class="row" style="text-align: center">
-
-							<div class="col-md-6">
-								<canvas id="access2"></canvas>
-								<br>
-								<b>正常</b>
-							</div>
-							<div class="col-md-6">
-								<canvas id="access3"></canvas>
-								<br>
-								<b>异常</b>
-							</div>
+					<div class="col-md-12 lg-box" style="min-width:521px;min-height:387px;margin-top:5px;margin-left: 58px;">
+						<div id="deviceWarning-top5" style="background-image:url('images/332211.png');background-size:100% 100%;background-repeat:no-repeat;">
 						</div>
-
-					</div>
-					<div class="col-md-6 lg-box" style="height:150px;">
-						<p>APP在线数量统计</p>
-						<div class="row" style="text-align: center">
-							<div class="col-md-12">
-								<canvas id="access1"></canvas>
-								<br>
-								<b>数量</b>
-							</div>
-
-						</div>
-
 					</div>
 				</div>
-				<div>
-					<div>
+				<div class="row">
+					<div class="col-md-12 lg-box" style="min-width:521px;min-height:387px;margin-top:5px;margin-left: 58px;">
+						<div id="deviceOff-top5" style="background-image:url('images/332211.png');background-size:100% 100%;background-repeat:no-repeat;">
+						</div>
 					</div>
 				</div>
-				<!-- lg-right -->
 			</div>
+
 			<!-- row -->
+		</div>
+	</div>
+	<div class="browserFooter" style="width:50%;height:10%;position: absolute;bottom: 0;left: 25%">
+		<div class="row">
+			<div class="col-md-4" style="text-align: center;">
+				<div style="position: absolute;top: 37%;left: 38%;"><a href="javascript:void(0);" onclick="switchLeftBox()" style="text-decoration: none;color: #fff;"><span style="font-size: 20px;">系统状态</span></a></div>
+				<img id="systemButtonImg" src="images/nav-normal.png" width="120" height="100">
+			</div>
+			<div class="col-md-4" style="text-align: center;">
+				<div style="position: absolute;top: 37%;left: 38%;"><a href="javascript:void(0);" onclick="returnBaseBox()" style="text-decoration: none;color: #fff;"><span style="font-size: 20px;">基本概况</span></a></div>
+				<img id="baseButtonImg" src="images/nav-active.png" width="160" height="100">
+			</div>
+			<div class="col-md-4" style="text-align: center;">
+				<div style="position: absolute;top: 37%;left: 38%;"><a href="javascript:void(0);" onclick="switchRightBox()" style="text-decoration: none;color: #fff;"><span style="font-size: 20px;">实时统计</span></a></div>
+				<img id="dataButtonImg" src="images/nav-normal.png" width="120" height="100">
+			</div>
 		</div>
 	</div>
 </div>
@@ -423,14 +769,137 @@
     $(document).ready(function() {
         var fullHeight = $(window).height();
         $('#headerTemp1').css('height', fullHeight*0.04);
-        $('#headerTemp2').css('height', fullHeight*0.04);
-        $('#headerTemp3').css('height', fullHeight*0.04);
-        $('#headerTemp4').css('height', fullHeight*0.04);
 
-        $('#logoTemp').css('height', fullHeight*0.09);
-        $('#logoTemp').css('width', fullHeight*0.12);
         $('.splash').css('display', 'none');
     });
+    var time1 = "";
+    var time2 = "";
+    //启动定时器，获取当前时间
+    setInterval(function(){
+        var time = currentTime();
+        time1 = time[0];
+        time2 = time[1];
+        $("#showTime1").text(time1);
+        $("#showTime2").text(time2);
+    },1000);
+
+    function currentTime(){
+        var arr = [];
+        var nowDate = new Date();
+        var year = nowDate.getFullYear();
+        var month = nowDate.getMonth()+1;
+        var date = nowDate.getDate();
+        var hour = nowDate.getHours();
+        var minute = nowDate.getMinutes();
+        var second = nowDate.getSeconds();
+
+        arr.push(year+"年"+month+"月"+date+"日");
+        arr.push(hour+"时"+minute+"分"+second+"秒");
+        return arr;
+    }
+
+    var leftStatus = true;
+    var rightStatus = true;
+    var baseStatus = true;
+    function switchLeftBox(){
+        if(!leftStatus){
+            return false;
+		}
+        leftStatus = false;
+        var display = $("#systemSource").css("display");
+        if(display == 'block'){
+            $("#systemButtonImg").attr("src","images/nav-active.png");
+            $("#systemButtonImg").width(160);
+            $("#systemButtonImg").height(100);
+
+            $("#baseButtonImg").attr("src","images/nav-normal.png");
+            $("#baseButtonImg").width(120);
+            $("#baseButtonImg").height(100);
+
+            $("#systemSource").fadeToggle(500,function () {
+                $("#leftTopDesc").text("系统状态");
+                $("#systemStatus").fadeToggle(500,function () {
+                    leftStatus = true;
+                });
+            });
+		}else{
+            $("#systemButtonImg").attr("src","images/nav-normal.png");
+            $("#systemButtonImg").width(120);
+            $("#systemButtonImg").height(100);
+
+            if($("#dataButtonImg").width() == 120){
+                $("#baseButtonImg").attr("src","images/nav-active.png");
+                $("#baseButtonImg").width(160);
+                $("#baseButtonImg").height(100);
+			}
+
+            $("#systemStatus").fadeToggle(500,function () {
+                $("#leftTopDesc").text("系统资源");
+                $("#systemSource").fadeToggle(500,function () {
+                    leftStatus = true;
+                });
+            });
+		}
+	}
+
+    function switchRightBox(){
+        if(!rightStatus){
+            return false;
+        }
+        rightStatus = false;
+        var display = $("#dataAnalysis").css("display");
+        if(display == 'block'){
+            $("#dataButtonImg").attr("src","images/nav-active.png");
+            $("#dataButtonImg").width(160);
+            $("#dataButtonImg").height(100);
+
+            $("#baseButtonImg").attr("src","images/nav-normal.png");
+            $("#baseButtonImg").width(120);
+            $("#baseButtonImg").height(100);
+
+            $("#dataAnalysis").fadeToggle(500,function () {
+                $("#rightTopDesc").text("实时统计");
+                $("#nowTotal").fadeToggle(500,function () {
+                    rightStatus = true;
+                });
+
+            });
+        }else{
+            $("#dataButtonImg").attr("src","images/nav-normal.png");
+            $("#dataButtonImg").width(120);
+            $("#dataButtonImg").height(100);
+
+            if($("#systemButtonImg").width() == 120){
+                $("#baseButtonImg").attr("src","images/nav-active.png");
+                $("#baseButtonImg").width(160);
+                $("#baseButtonImg").height(100);
+            }
+
+            $("#nowTotal").fadeToggle(500,function () {
+                $("#rightTopDesc").text("数据分析");
+                $("#dataAnalysis").fadeToggle(500,function () {
+                    rightStatus = true;
+                });
+            });
+        }
+    }
+
+    function returnBaseBox() {
+        if(!baseStatus){
+            return false;
+        }
+        baseStatus = false;
+
+        var width1 = $("#systemButtonImg").width();
+        var width2 = $("#dataButtonImg").width();
+        if(width1 == 160){
+            switchLeftBox()
+		}
+		if(width2 == 160){
+            switchRightBox();
+		}
+        baseStatus = true;
+    }
 </script>
 </body>
 </html>

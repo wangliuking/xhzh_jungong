@@ -42,6 +42,8 @@ public class RTUController {
     AsyncController asyncController;
     @Autowired
     private StructureController structureController;
+    @Autowired
+    FeignForData feignForData;
 
     @RequestMapping(value = "/selectAllRTU",method = RequestMethod.GET)
     public Map<String,Object> selectAllRTU (HttpServletRequest req, HttpServletResponse resp) {
@@ -169,9 +171,92 @@ public class RTUController {
         }
     }
 
+    @RequestMapping(value = "/selectAllRTUDraw",method = RequestMethod.GET)
+    public Map<String,Object> selectAllRTUDraw (@RequestParam String site_id) {
+        Map<String,Object> param = new HashMap<>();
+        param.put("site_id",site_id);
+        List<Map<String, Object>> rtuList = rtuService.selectAllRTUDrawBySiteId(param);
+        Map<String, Object> rtuListMap = new HashMap<>();
+        for(Map<String,Object> map : rtuList){
+            int rtu_id = Integer.parseInt(map.get("rtu_id") + "");
+            int deviceWarning = rtuService.selectDeviceWarningCount(rtu_id);
+            System.out.println("deviceWarning : " + deviceWarning);
+            int rtu_state = -1;
+            if(map.get("rtu_state") != null && map.get("rtu_state") != ""){
+                rtu_state = Integer.parseInt(map.get("rtu_state") + "");
+            }else{
+                rtu_state = 1;
+            }
+            if (deviceWarning > 0 && rtu_state == 0) {
+                //异常
+                map.put("rtu_state", 2);
+            }
+
+            Map<String,Object> p = new HashMap<>();
+            p.put("rtu_id",rtu_id);
+            Map<String,Object> dataMap = feignForData.rtuDraw(p);
+            Map<String,Object> healthMap = (Map)dataMap.get("health");
+            Map<String,Object> riskMap = (Map)dataMap.get("risk");
+            map.put("health",healthMap.get("score"));
+            map.put("risk",riskMap.get("score"));
+        }
+        rtuListMap.put("items", rtuList);
+        rtuListMap.put("totals", rtuList.size());
+        rtuListMap.put("siteInfo",rtuService.selectSiteInfo(param));
+        return rtuListMap;
+    }
+
     @RequestMapping(value = "/selectRTUById",method = RequestMethod.GET)
     public Map<String,Object> selectRTUById (@RequestParam int id){
         return rtuService.selectRTUById(id);
+    }
+
+    @RequestMapping(value = "/rtuDraw",method = RequestMethod.GET)
+    public Map<String,Object> rtuDraw (@RequestParam int id){
+        Map<String,Object> param = new HashMap<>();
+        param.put("rtu_id",id+"");
+        Map<String,Object> resultMap = feignForData.rtuDraw(param);
+        Map<String,Object> map = rtuService.selectRTUById(id);
+
+        int rtu_id = Integer.parseInt(id + "");
+        int deviceWarning = rtuService.selectDeviceWarningCount(rtu_id);
+        int rtu_state = -1;
+        if(map.get("rtu_state") != null && map.get("rtu_state") != ""){
+            rtu_state = Integer.parseInt(map.get("rtu_state") + "");
+        }else{
+            rtu_state = 1;
+        }
+        if (deviceWarning > 0 && rtu_state == 0) {
+            //异常
+            map.put("rtu_state", 2);
+        }
+
+        resultMap.put("rtuInfo",map);
+
+        Map<String,Object> spdMap = rtuService.selectSPDStatusById(id);
+        if(spdMap != null){
+            String spdTemp = spdMap.get("status")+"";
+            if("0".equals(spdTemp)){
+                resultMap.put("spdStatus",0);
+            }else {
+                resultMap.put("spdStatus",1);
+            }
+        }
+
+        Map<String,Object> etcrMap = rtuService.selectETCRStatusById(id);
+        if(etcrMap != null){
+            String etcrStatus = etcrMap.get("status")+"";
+            String etcrAlarm = etcrMap.get("alarm")+"";
+            if("1".equals(etcrStatus)){
+                resultMap.put("etcrStatus",1);
+            }else if("0".equals(etcrStatus) && Integer.parseInt(etcrAlarm) > 0){
+                resultMap.put("etcrStatus",2);
+            }else if("0".equals(etcrStatus) && "0".equals(etcrAlarm)){
+                resultMap.put("etcrStatus",0);
+            }
+        }
+
+        return resultMap;
     }
 
     @RequestMapping(value = "/selectAllRTUPosition",method = RequestMethod.GET)

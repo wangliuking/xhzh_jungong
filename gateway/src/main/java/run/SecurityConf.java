@@ -53,6 +53,7 @@ public class SecurityConf extends WebSecurityConfigurerAdapter {
             .antMatchers("/insertLog").permitAll()
             .antMatchers("/local/**").permitAll()
             .antMatchers("/login").permitAll()
+            .antMatchers("/loginWeb").permitAll()
             .antMatchers("/auth/**").permitAll()
             .antMatchers("/spd/**").permitAll()
             .antMatchers("/etcr/**").permitAll()

@@ -37,11 +37,33 @@ public interface RTUMapper {
             "</script>")
     List<Map<String,Object>> selectAllRTU(Map<String,Object> param);
 
+    @Select("<script>" +
+            "select a.*,b.rtu_state from rtu_config a left join rtu_now_data b on a.rtu_id=b.rtu_id where 1=1 " +
+            "<if test=\"site_id != null and site_id != -1\">" +
+            "and a.site_id =#{site_id}"+
+            "</if>"+
+            "</script>")
+    List<Map<String,Object>> selectAllRTUDrawBySiteId(Map<String,Object> param);
+
+    @Select("<script>" +
+            "select a.*,b.name from site_config a left join structure b on a.site_company=b.id where 1=1 " +
+            "<if test=\"site_id != null and site_id != -1\">" +
+            "and a.site_id =#{site_id}"+
+            "</if>"+
+            "</script>")
+    Map<String,Object> selectSiteInfo(Map<String,Object> param);
+
     @Select("select count(*) from rtu_alarm_data where rtu_id = #{rtu_id} and type = 3")
     int selectDeviceWarningCount(@Param("rtu_id") int rtu_id);
 
     @Select("select *,b.rtu_state from rtu_config a left join rtu_now_data b on a.rtu_id=b.rtu_id where a.rtu_id = #{id}")
     Map<String,Object> selectRTUById(int id);
+
+    @Select("select sum(spd_state) status from spd_now_data where rtu_id=#{id}")
+    Map<String,Object> selectSPDStatusById(int id);
+
+    @Select("select sum(rst_state) status,sum(alarm) alarm from resistance_now_data where rtu_id=#{id}")
+    Map<String,Object> selectETCRStatusById(int id);
 
     @Select("select count(*) from rtu_config where site_id = #{site_id}")
     int selectRTUCountBySiteId(int site_id);

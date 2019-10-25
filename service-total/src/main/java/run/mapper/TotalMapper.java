@@ -31,12 +31,30 @@ public interface TotalMapper {
     int selectSiteTotal(Map<String,Object> param);
 
     @Select("<script>" +
+            "select count(*) from (select a.* from site_config a left join rtu_config b on a.site_id=b.site_id where rtu_id is not null and a.site_company in "+
+            "<foreach collection=\"strList\" index=\"index\" item=\"id\" open=\"(\" separator=\",\" close=\")\">"+
+            "#{id}"+
+            "</foreach>"+
+            " group by a.site_id) t"+
+            "</script>")
+    int selectSiteOnTotal(Map<String,Object> param);
+
+    @Select("<script>" +
             "select count(*) from rtu_config a left join site_config b on a.site_id=b.site_id where b.site_company in "+
             "<foreach collection=\"strList\" index=\"index\" item=\"id\" open=\"(\" separator=\",\" close=\")\">"+
             "#{id}"+
             "</foreach>"+
             "</script>")
     int selectRTUTotal(Map<String,Object> param);
+
+    @Select("<script>" +
+            "select count(*) from (select a.* from rtu_config a left join site_config b on a.site_id=b.site_id left join spd_config c on a.rtu_id=c.rtu_id left join resistance_config d on a.rtu_id=d.rtu_id where c.rtu_id is null and d.rtu_id is null and b.site_company in "+
+            "<foreach collection=\"strList\" index=\"index\" item=\"id\" open=\"(\" separator=\",\" close=\")\">"+
+            "#{id}"+
+            "</foreach>"+
+            " group by a.rtu_id) t"+
+            "</script>")
+    int selectRTUOffTotal(Map<String,Object> param);
 
     @Select("<script>" +
             "select t.* from (select a.*,b.rtu_state from rtu_config a left join rtu_now_data b on a.rtu_id=b.rtu_id where rtu_state=1 or rtu_state is null) t left join site_config s on t.site_id=s.site_id where s.site_company in "+
@@ -69,6 +87,32 @@ public interface TotalMapper {
             "group by a.rtu_id"+
             "</script>")
     List<Map<String,Object>> selectRTUWarning(Map<String, Object> param);
+
+    @Select("<script>" +
+            "select a.*,b.site_id from rtu_alarm_data a left join rtu_config b on a.rtu_id = b.rtu_id left join site_config c on b.site_id=c.site_id where type=3 and alarmStatus=1 and c.site_company in "+
+            "<foreach collection=\"strList\" index=\"index\" item=\"id\" open=\"(\" separator=\",\" close=\")\">"+
+            "#{id}"+
+            "</foreach>"+
+            "group by c.site_id"+
+            "</script>")
+    List<Map<String,Object>> selectSiteWarning(Map<String, Object> param);
+
+    @Select("<script>" +
+            "select a.*,b.site_id from rtu_alarm_data a left join rtu_config b on a.rtu_id = b.rtu_id left join site_config c on b.site_id=c.site_id where type=3 and (deviceType=0 or deviceType=1) and alarmStatus=1 and c.site_company in "+
+            "<foreach collection=\"strList\" index=\"index\" item=\"id\" open=\"(\" separator=\",\" close=\")\">"+
+            "#{id}"+
+            "</foreach>"+
+            "group by a.rtu_channel,a.devieceId"+
+            "</script>")
+    List<Map<String,Object>> selectETCRWarning(Map<String, Object> param);
+
+    @Select("<script>" +
+            "select count(*) from rtu_alarm_data a left join rtu_config b on a.rtu_id = b.rtu_id left join site_config c on b.site_id=c.site_id where alarmStatus=1 and c.site_company in "+
+            "<foreach collection=\"strList\" index=\"index\" item=\"id\" open=\"(\" separator=\",\" close=\")\">"+
+            "#{id}"+
+            "</foreach>"+
+            "</script>")
+    int selectAlarmNowNum(Map<String, Object> param);
 
     @Select("<script>" +
             "select count(*) from "+
@@ -106,7 +150,32 @@ public interface TotalMapper {
             "#{id}"+
             "</foreach>"+
             "</script>")
-    List<Map<String,Object>> selectSiteOffTotal(Map<String, Object> param);
+    List<Map<String,Object>> selectSiteOffLineTotal(Map<String, Object> param);
+
+    @Select("<script>" +
+            "select count(*) from rtu_config a left join rtu_now_data b on a.rtu_id=b.rtu_id left join site_config c on a.site_id=c.site_id where b.rtu_state=1 and c.site_company in "+
+            "<foreach collection=\"strList\" index=\"index\" item=\"id\" open=\"(\" separator=\",\" close=\")\">"+
+            "#{id}"+
+            "</foreach>"+
+            "</script>")
+    int selectRTUOffLine(Map<String, Object> param);
+
+    @Select("<script>" +
+            "select count(*) from spd_config a left join spd_now_data b on a.rtu_id=b.rtu_id left join site_config c on a.site_id=c.site_id where b.spd_state=1 and c.site_company in "+
+            "<foreach collection=\"strList\" index=\"index\" item=\"id\" open=\"(\" separator=\",\" close=\")\">"+
+            "#{id}"+
+            "</foreach>"+
+            "</script>")
+    int selectSPDOffLine(Map<String, Object> param);
+
+    @Select("<script>" +
+            "select a.* from resistance_config a left join resistance_now_data b on a.rtu_id=b.rtu_id left join site_config c on a.site_id=c.site_id where b.rst_state=1 and c.site_company in "+
+            "<foreach collection=\"strList\" index=\"index\" item=\"id\" open=\"(\" separator=\",\" close=\")\">"+
+            "#{id}"+
+            "</foreach>"+
+            " group by a.rst_id"+
+            "</script>")
+    List<Map<String,Object>> selectETCROffLine(Map<String, Object> param);
 
     @Select("<script>" +
             "select a.* from rtu_alarm_data a left join rtu_config b on a.rtu_id=b.rtu_id left join site_config c on b.site_id=c.site_id where type=3 and alarmStatus=1 and c.site_company in "+
@@ -263,6 +332,14 @@ public interface TotalMapper {
             "group by rtu_id,rtu_port,rst_id) as t"+
             "</script>")
     int selectETCRTotal(Map<String, Object> param);
+
+    @Select("<script>" +
+            "select count(*) from resistance_config a left join site_config b on a.site_id=b.site_id where a.rst_id=1 and b.site_company in "+
+            "<foreach collection=\"strList\" index=\"index\" item=\"id\" open=\"(\" separator=\",\" close=\")\">"+
+            "#{id}"+
+            "</foreach>"+
+            "</script>")
+    int selectETCRRelaynoTotal(Map<String, Object> param);
 
     @Select("<script>" +
             "select a.rtu_port,sum(rst_state) rst_state,sum(alarm) alarm,a.rst_id from resistance_config as a left join resistance_now_data as b on a.rtu_id=b.rtu_id and a.rtu_port=b.rtu_channel and a.rst_id=b.rst_id and a.relayno=b.relayno where a.rst_id!=0 "+

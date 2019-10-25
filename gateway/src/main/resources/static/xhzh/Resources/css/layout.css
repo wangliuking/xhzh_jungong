@@ -232,15 +232,13 @@ text-decoration:none;
 }
 .lgData-content{
 	background-image:url("../../images/bg-02.png");
-	background-repeat:no-repeat; 
+	background-repeat:no-repeat;
 	background-size:100% 100%;
 	-moz-background-size:100% 100%;
 	/* background:#000; */
 	position:absolute;
-	margin:0;
-	padding:0 0 0 15px;
-	min-width:100%;
-	min-height:100%;
+	min-width:1920px;
+	min-height:1080px;
 	color:#fff;
 }
 .lg-box{

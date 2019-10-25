@@ -1,6 +1,7 @@
 package run.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,6 +26,15 @@ public class DataController {
         reslutMap.put("list2",list2);
         reslutMap.put("l1",l1);
         reslutMap.put("l2",l2);
+        return reslutMap;
+    }
+
+    @RequestMapping(value = "/rtuDraw",method = RequestMethod.POST)
+    public Map<String,Object> rtuDraw(@RequestBody Map<String,Object> map){
+        String rtu_id = map.get("rtu_id")+"";
+        Map<String,Object> reslutMap = new HashMap<>();
+        reslutMap.put("health",dataService.rtuHealth(rtu_id));
+        reslutMap.put("risk",dataService.rtuRisk(rtu_id));
         return reslutMap;
     }
 }
