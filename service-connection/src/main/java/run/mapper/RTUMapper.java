@@ -56,7 +56,7 @@ public interface RTUMapper {
     @Select("select count(*) from rtu_alarm_data where rtu_id = #{rtu_id} and type = 3")
     int selectDeviceWarningCount(@Param("rtu_id") int rtu_id);
 
-    @Select("select *,b.rtu_state from rtu_config a left join rtu_now_data b on a.rtu_id=b.rtu_id where a.rtu_id = #{id}")
+    @Select("select *,b.rtu_state,c.disktotalsize,c.diskuselsize,c.memtotalsize,c.memusesize,c.cpuusage from rtu_config a left join rtu_now_data b on a.rtu_id=b.rtu_id left join rtu_device_data c on a.rtu_id=c.rtu_id where a.rtu_id = #{id}")
     Map<String,Object> selectRTUById(int id);
 
     @Select("select sum(spd_state) status from spd_now_data where rtu_id=#{id}")
