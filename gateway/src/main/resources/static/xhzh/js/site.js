@@ -101,6 +101,9 @@ xh.load = function() {
         /* 显示添加框 */
         $scope.showMod = function() {
             /*$('#add input').val('');*/
+            $("#allmap").height(0);
+            $("#site_lng").val("");
+            $("#site_lat").val("");
             $('#add').modal('show');
         };
 
@@ -112,15 +115,20 @@ xh.load = function() {
 
         /* 显示修改框 */
         $scope.showEdit = function(id) {
+            $("#allmapEdit").height(0);
             $scope.editData = $scope.data[id];
             var site_province = $scope.editData.site_province;
             var site_city = $scope.editData.site_city;
             var site_county = $scope.editData.site_county;
+            var site_lng = $scope.editData.site_lng;
+            var site_lat = $scope.editData.site_lat;
             $("#editProvince").val(site_province);
             $("#editProvince").change();
             $("#editCity").val(site_city);
             $("#editCity").change();
             $("#editArea").val(site_county);
+            $("#site_lngEdit").val(site_lng);
+            $("#site_latEdit").val(site_lat);
             $("#editArea").change();
             $('#edit').modal('show');
         };

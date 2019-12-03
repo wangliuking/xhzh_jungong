@@ -603,6 +603,10 @@ function start() {
     chart.setOption(option);
     // 获取百度地图实例，使用百度地图自带的控件
     map = chart.getModel().getComponent('bmap').getBMap();
+    // 设置最小缩放值
+    map.setMinZoom(4);
+    // 设置最大缩放值
+    map.setMaxZoom(9);
     //添加地图类型控件
     map.addControl(new BMap.MapTypeControl({
         mapTypes: [
