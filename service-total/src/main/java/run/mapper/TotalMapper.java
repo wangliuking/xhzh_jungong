@@ -789,6 +789,9 @@ public interface TotalMapper {
             "<if test=\"rtu_id != null and rtu_id != -1\">" +
             "and b.rtu_id =#{rtu_id}"+
             "</if>"+
+            "<if test=\"rtu_channel != null and rtu_channel != -1\">" +
+            "and a.rtu_channel =#{rtu_channel}"+
+            "</if>"+
             "<if test=\"rst_id != null and rst_id != -1\">" +
             "and a.rst_id =#{rst_id}"+
             "</if>"+
@@ -806,6 +809,9 @@ public interface TotalMapper {
             "</if>"+
             "<if test=\"rtu_id != null and rtu_id != -1\">" +
             "and b.rtu_id =#{rtu_id}"+
+            "</if>"+
+            "<if test=\"rtu_channel != null and rtu_channel != -1\">" +
+            "and a.rtu_channel =#{rtu_channel}"+
             "</if>"+
             "<if test=\"ltn_id != null and ltn_id != -1\">" +
             "and b.ltn_id =#{ltn_id}"+
@@ -825,6 +831,9 @@ public interface TotalMapper {
             "<if test=\"rtu_id != null and rtu_id != -1\">" +
             "and b.rtu_id =#{rtu_id}"+
             "</if>"+
+            "<if test=\"rtu_channel != null and rtu_channel != -1\">" +
+            "and a.rtu_channel =#{rtu_channel}"+
+            "</if>"+
             "<if test=\"staet_id != null and staet_id != -1\">" +
             "and b.staet_id =#{staet_id}"+
             "</if>"+
@@ -842,6 +851,9 @@ public interface TotalMapper {
             "</if>"+
             "<if test=\"rtu_id != null and rtu_id != -1\">" +
             "and b.rtu_id =#{rtu_id}"+
+            "</if>"+
+            "<if test=\"rtu_channel != null and rtu_channel != -1\">" +
+            "and a.rtu_channel =#{rtu_channel}"+
             "</if>"+
             "<if test=\"hmt_id != null and hmt_id != -1\">" +
             "and b.hmt_id =#{hmt_id}"+
@@ -861,6 +873,9 @@ public interface TotalMapper {
             "<if test=\"rtu_id != null and rtu_id != -1\">" +
             "and b.rtu_id =#{rtu_id}"+
             "</if>"+
+            "<if test=\"rtu_channel != null and rtu_channel != -1\">" +
+            "and a.rtu_channel =#{rtu_channel}"+
+            "</if>"+
             "<if test=\"tilt_id != null and tilt_id != -1\">" +
             "and b.tilt_id =#{tilt_id}"+
             "</if>"+
@@ -878,6 +893,9 @@ public interface TotalMapper {
             "</if>"+
             "<if test=\"rtu_id != null and rtu_id != -1\">" +
             "and b.rtu_id =#{rtu_id}"+
+            "</if>"+
+            "<if test=\"rtu_channel != null and rtu_channel != -1\">" +
+            "and a.rtu_channel =#{rtu_channel}"+
             "</if>"+
             "<if test=\"es_id != null and es_id != -1\">" +
             "and b.es_id =#{es_id}"+
@@ -897,6 +915,9 @@ public interface TotalMapper {
             "<if test=\"rtu_id != null and rtu_id != -1\">" +
             "and b.rtu_id =#{rtu_id}"+
             "</if>"+
+            "<if test=\"rtu_channel != null and rtu_channel != -1\">" +
+            "and a.rtu_channel =#{rtu_channel}"+
+            "</if>"+
             "<if test=\"stret_id != null and stret_id != -1\">" +
             "and b.stret_id =#{stret_id}"+
             "</if>"+
@@ -914,6 +935,9 @@ public interface TotalMapper {
             "</if>"+
             "<if test=\"rtu_id != null and rtu_id != -1\">" +
             "and b.rtu_id =#{rtu_id}"+
+            "</if>"+
+            "<if test=\"rtu_channel != null and rtu_channel != -1\">" +
+            "and a.rtu_channel =#{rtu_channel}"+
             "</if>"+
             "<if test=\"cathode_id != null and cathode_id != -1\">" +
             "and b.cathode_id =#{cathode_id}"+
