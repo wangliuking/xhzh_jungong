@@ -25,6 +25,9 @@ public class Chapter15 {
                         list.add(nums[i]);
                         list.add(nums[j]);
                         list.add(nums[z]);
+
+
+
                         res.add(list);
                     }
                 }
