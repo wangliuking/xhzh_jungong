@@ -107,7 +107,19 @@ public class RedisTest {
                     }
                 }
                 if(index != -1){
-                    if(operation != 1){
+                    if(operation == 8){
+                        //接触式接地电阻，特殊处理
+                        String etcrOpId = rs485Info.getDeviceid();
+                        int opStatus = Integer.parseInt(etcrOpId);
+                        if(opStatus <= 255){
+                            //删除
+                            rs485list.remove(index);
+                        }else {
+                            //先删除后添加
+                            rs485list.remove(index);
+                            rs485list.add(rs485Info);
+                        }
+                    }else if(operation != 1){
                        //该项为更新,先删除后添加
                         rs485list.remove(index);
                         rs485list.add(rs485Info);

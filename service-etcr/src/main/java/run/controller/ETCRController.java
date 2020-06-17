@@ -506,8 +506,10 @@ public class ETCRController {
 
                 }
 
-                int rel = Integer.parseInt(str.toString(),2);
-                etcr.setRst_id(rel+etcr.getRst_id());
+                int rel = Integer.parseInt(str.toString(), 2);
+                int devId = etcr.getRst_id();
+                int finalId = rel + devId;
+                etcr.setRst_id(finalId);
                 etcr.setRst_type(0);
                 Map<String,Object> tempParams = new HashMap<>();
                 tempParams.put("rtu",rtu);
@@ -517,10 +519,12 @@ public class ETCRController {
                     tempParams.put("op",1);
                 }else{
                     //继电器不为零的情况(变更操作码为8)
+                    etcr.setRst_id(devId);
                     tempParams.put("etcr",etcr);
                     tempParams.put("op",8);
                 }
                 String res = feignForMQ.sendETCRConfForRTU(tempParams);
+                etcr.setRst_id(finalId);
                 Map<String,Object> map = new HashMap<>();
                 if("配置成功".equals(res)){
                     //删除rtuAlarmData相关信息
